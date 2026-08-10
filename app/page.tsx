@@ -1,9 +1,15 @@
-import React from 'react'
+// page.tsx
+import Navbar from "@/component/layout/Navbar";
+import Hero from "@/component/home/Hero";
+import BenifitStrip from "@/component/home/BenifitStrip"
 
-const page = () => {
+export default function Home() {
   return (
-    <div>page</div>
-  )
+    <>
+      <Navbar cartCount={0} />
+      <Hero />
+      <BenifitStrip/>
+      {/* rest of homepage sections */}
+    </>
+  );
 }
-
-export default page

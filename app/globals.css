@@ -1,26 +1,201 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* ---- Colors ---- */
+  --color-ink: #0b0b0c;
+  --color-ink-soft: #17171a;
+  --color-ivory: #f9f6f0;
+  --color-stone: #9c9284;
+  --color-stone-light: #ece6d8;
+  --color-champagne: #c3a06b;
+  --color-white: #ffffff;
+
+  /* ---- Type ---- */
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+  --font-sans: var(--font-manrope), -apple-system, sans-serif;
+
+  /* ---- Type scale ---- */
+  --text-display-xl: 6rem;
+  --text-display-xl--line-height: 0.98;
+  --text-display-xl--letter-spacing: -0.01em;
+
+  --text-display-lg: 3.75rem;
+  --text-display-lg--line-height: 1.05;
+  --text-display-lg--letter-spacing: -0.01em;
+
+  --text-display-md: 2.5rem;
+  --text-display-md--line-height: 1.1;
+
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.16em;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.6;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.4;
+
+  /* ---- Layout ---- */
+  --container-max: 90rem;
+  --container-padding: 1.5rem;
+
+  /* ---- Motion ---- */
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus */
+:focus-visible {
+  outline: 2px solid var(--color-champagne);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Primitives
+   ========================================================================== */
+
+/* Page container */
+.container-stridex {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container-stridex {
+    padding-inline: 2.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-stridex {
+    padding-inline: 4rem;
+  }
+}
+
+/* Section rhythm */
+.section-y {
+  padding-block: 4rem;
+}
+
+@media (min-width: 768px) {
+  .section-y {
+    padding-block: 6rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .section-y {
+    padding-block: 8rem;
+  }
+}
+
+/* Eyebrow label */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Display headline */
+.display-headline {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: var(--text-display-xl--letter-spacing);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-inline: 1.75rem;
+  padding-block: 0.9rem;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    background-color 0.3s var(--ease-editorial),
+    color 0.3s var(--ease-editorial),
+    border-color 0.3s var(--ease-editorial);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: var(--color-ink);
+  color: var(--color-ivory);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-champagne);
+  color: var(--color-ink);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+}
+
+.btn-outline:hover {
+  border-color: var(--color-champagne);
+  color: var(--color-champagne);
+}
+/* ==========================================================================
+   Dividers
+   ========================================================================== */
+
+.hairline {
+  height: 1px;
+  background-color: var(--color-stone-light);
+  border: none;
+}
+
+.hairline-dark {
+  height: 1px;
+  background-color: rgb(255 255 255 / 0.12);
+  border: none;
 }
