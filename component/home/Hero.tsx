@@ -53,10 +53,10 @@ const Hero = () => {
  <motion.div
   initial={{ opacity: 0, scale: 0.92, x: 30 }}
   animate={{ opacity: 1, scale: 1, x: 0 }}
-  transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+  transition={{ duration: 2, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
   className="relative flex items-center justify-center mt-10 lg:mt-0"
 >
-  {/* soft circular arc behind the shoe, no box/panel */}
+ 
   
   <div className="absolute h-32 w-32 rounded-full bg-(--color-champagne)/20 blur-3xl translate-y-16" />
 

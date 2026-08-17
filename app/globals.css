@@ -64,17 +64,12 @@ body {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
+  *:not(.motion-safe-spinner),
+  *:not(.motion-safe-spinner)::before,
+  *:not(.motion-safe-spinner)::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+
   }
 }
 
@@ -83,10 +78,6 @@ body {
   outline: 2px solid var(--color-champagne);
   outline-offset: 3px;
 }
-
-/* ==========================================================================
-   Primitives
-   ========================================================================== */
 
 /* Page container */
 .container-stridex {
@@ -142,9 +133,7 @@ body {
   letter-spacing: var(--text-display-xl--letter-spacing);
 }
 
-/* ==========================================================================
-   Buttons
-   ========================================================================== */
+
 
 .btn {
   display: inline-flex;
@@ -199,3 +188,6 @@ body {
   background-color: rgb(255 255 255 / 0.12);
   border: none;
 }
+
+
+

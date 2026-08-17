@@ -37,7 +37,7 @@ export default function Navbar({ cartCount = 0 }: { cartCount?: number }) {
       <header
         className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-500 ${
           isScrolled
-            ? "border-(--color-stone-light) bg-(--color-ivory)/95 backdrop-blur-sm"
+            ? "border-(--color-stone-light) bg-ivory/95 backdrop-blur-sm"
             : "border-transparent bg-(--color-ivory)"
         }`}
       >
@@ -134,7 +134,7 @@ function MobileDrawer({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[60] flex flex-col bg-(--color-ink)"
+          className="fixed inset-0 z-60 flex flex-col bg-(--color-ink)"
         >
           <div className="container-stridex flex h-16 items-center justify-between md:h-20">
             <span className="font-sans text-lg font-bold tracking-[0.2em] text-(--color-ivory)">

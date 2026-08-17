@@ -2,7 +2,7 @@ import { Leaf, RefreshCw, ShieldCheck, Truck } from "lucide-react";
 
 const BenefitsStrip = () => {
   return (
-    <section className=" section-y lg:pt-0! ">
+    <section className=" section-y  ">
       <div className="container-stridex">
         {/* Outer bordered container */}
         <div className="overflow-hidden rounded-2xl border border-[var(--color-stone-light)]">
