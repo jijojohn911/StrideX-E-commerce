@@ -2,8 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { updateProductSchema } from "@/validations/product";
-import { success } from "zod";
-
+import { getAuthUser } from "@/lib/auth";
 
 //Get one product
 export const GET = async (
@@ -21,7 +20,7 @@ export const GET = async (
     if (!product) {
       return NextResponse.json(
         {
-          success: true,
+          success: false,
           message: "product not found",
         },
         { status: 404 },
@@ -41,14 +40,12 @@ export const GET = async (
     return NextResponse.json(
       {
         success: false,
-        meessage: "Internal Server Error",
+        message: "Internal Server Error",
       },
       { status: 500 },
     );
   }
 };
-
-
 
 //update product
 export const PUT = async (
@@ -56,6 +53,14 @@ export const PUT = async (
   { params }: { params: Promise<{ slug: string }> },
 ) => {
   try {
+    const authUser = getAuthUser(req);
+    if (authUser?.role !== "admin") {
+      return NextResponse.json(
+        { success: false, message: authUser ? "Forbidden" : "Unauthorized" },
+        { status: authUser ? 403 : 401 },
+      );
+    }
+
     const { slug } = await params;
 
     const body = await req.json();
@@ -119,41 +124,50 @@ export const PUT = async (
 
 //Soft Delete Product
 export const DELETE = async (
-  req:NextRequest,
-  {params}:{params:Promise<{slug:string}>}
-)=>{
-
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> },
+) => {
   try {
-    const {slug} = await params
+    const authUser = getAuthUser(req);
+    if (authUser?.role !== "admin") {
+      return NextResponse.json(
+        { success: false, message: authUser ? "Forbidden" : "Unauthorized" },
+        { status: authUser ? 403 : 401 },
+      );
+    }
+
+    const { slug } = await params;
     await connectDB();
 
     const product = await Product.findOneAndUpdate(
       {
         slug,
-        isActive:true,
+        isActive: true,
       },
       {
-        isActive:false,
+        isActive: false,
       },
       {
-        new:true
+        new: true,
       },
     );
-    if(!product){
-      return NextResponse.json({
-        success:false,
-        message:"Product not found"
-      },
-    {status:404})
+    if (!product) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Product not found",
+        },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json(
       {
-        success:true,
-        message:"Product deleted sucessfully"
+        success: true,
+        message: "Product deleted sucessfully",
       },
-      {status:200}
-    )
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
 
@@ -165,6 +179,4 @@ export const DELETE = async (
       { status: 500 },
     );
   }
-}
-
-
+};

@@ -33,7 +33,7 @@ const productSchema = new Schema<IProduct>(
       required: true,
       trim: true,
       minlength: 3,
-      maxlength: 100,
+      maxlength: 1000,
     },
     price: {
       type: Number,

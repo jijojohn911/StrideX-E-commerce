@@ -1,8 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import Cart from "@/models/Cart";
+import Cart, { ICart } from "@/models/Cart";
 import Product from "@/models/Product";
-import { getAuthUser } from "@/lib/auth";
+import { getAuthUser, JwtPayload } from "@/lib/auth";
 import { Types } from "mongoose";
 import {
   addItemSchema,
@@ -35,7 +35,7 @@ export const GET = async (req: NextRequest) => {
   try {
     await connectDB();
 
-    const user = await getAuthUser(req);
+    const user: JwtPayload | null = await getAuthUser(req);
 
     if (!user) {
       return NextResponse.json(
@@ -44,9 +44,9 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
-    const cart = await Cart.findOne({ user: user.userId }).populate(
-      "items.product",
-    );
+    const cart: ICart | null = await Cart.findOne({
+      user: user.userId,
+    }).populate("items.product");
 
     return NextResponse.json({
       success: true,
@@ -66,7 +66,7 @@ export const POST = async (req: NextRequest) => {
   try {
     await connectDB();
 
-    const user = await getAuthUser(req);
+    const user: JwtPayload | null = await getAuthUser(req);
 
     if (!user) {
       return NextResponse.json(
@@ -126,7 +126,14 @@ export const POST = async (req: NextRequest) => {
     if (!cart) {
       cart = await Cart.create({
         user: user.userId,
-        items: [{ product: productId, size, color, quantity }],
+        items: [
+          {
+            product: new Types.ObjectId(productId),
+            size,
+            color,
+            quantity,
+          },
+        ],
       });
     } else {
       const index = findItemIndex(cart.items, productId, size, color);
@@ -143,13 +150,18 @@ export const POST = async (req: NextRequest) => {
 
         cart.items[index].quantity = newQuantity;
       } else {
-        cart.items.push({ product: productId, size, color, quantity });
+        cart.items.push({
+          product: new Types.ObjectId(productId),
+          size,
+          color,
+          quantity,
+        });
       }
 
       await cart.save();
     }
 
-    const populatedCart = await cart.populate("items.product");
+    const populatedCart = await cart!.populate("items.product");
 
     return NextResponse.json({
       success: true,
@@ -169,7 +181,7 @@ export const POST = async (req: NextRequest) => {
 export const PATCH = async (req: NextRequest) => {
   try {
     await connectDB();
-    const user = await getAuthUser(req);
+    const user: JwtPayload | null = await getAuthUser(req);
 
     if (!user) {
       return NextResponse.json(
@@ -210,7 +222,7 @@ export const PATCH = async (req: NextRequest) => {
       );
     }
 
-    const cart = await Cart.findOne({ user: user.userId });
+    const cart: ICart | null = await Cart.findOne({ user: user.userId });
 
     if (!cart) {
       return NextResponse.json(
@@ -252,7 +264,7 @@ export const PATCH = async (req: NextRequest) => {
 export const DELETE = async (req: NextRequest) => {
   try {
     await connectDB();
-    const user = await getAuthUser(req);
+    const user: JwtPayload | null = await getAuthUser(req);
 
     if (!user) {
       return NextResponse.json(
@@ -280,7 +292,7 @@ export const DELETE = async (req: NextRequest) => {
     }
 
     const { productId, size, color } = parsed.data;
-    const cart = await Cart.findOne({ user: user.userId });
+    const cart: ICart | null = await Cart.findOne({ user: user.userId });
 
     if (!cart) {
       return NextResponse.json(

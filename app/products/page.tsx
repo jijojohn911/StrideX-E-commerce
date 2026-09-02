@@ -14,6 +14,7 @@ interface ApiProduct {
 const ProductPage = () => {
   const [products, setProducts] = useState<ProductCardData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -35,6 +36,7 @@ const ProductPage = () => {
         setProducts(formattedProducts);
       } catch (error) {
         console.error(error);
+        setError("Failed to load products. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -55,35 +57,28 @@ const ProductPage = () => {
             </h1>
 
             <p className="mt-4 max-w-md text-sm leading-6 text-stone ">
-              Explore the latest footwear disigned for everyday movement
+              Explore the latest footwear designed for everyday movement
             </p>
           </div>
 
-          {loading && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-6">
-                {[1,2,3,4,5,6,7,8].map((item)=>(
-                    <div
-                    key={item}
-                    className="aspect-square animate-pulse rounded-3xl bg-stone-light"/>
-                ))}
-            </div>
+          {!loading && error && (
+            <p className="py-12 text-sm text-red-500">{error}</p>
+          )}
+
+          {!loading && !error && products.length === 0 && (
+            <p className="py-12 text-sm text-stone">No products available.</p>
           )}
 
           {/* products */}
 
-            {!loading && products.length > 0 && (
+          {!loading && products.length > 0 && (
             <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-6">
               {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                />
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
-          
 
-         
           {/* empty loading*/}
           {!loading && products.length === 0 && (
             <p className="py-12 text-sm text-stone">No products Available</p>

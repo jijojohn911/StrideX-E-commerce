@@ -1,19 +1,36 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
-import ProductCard, { ProductCardData } from "@/component/products/ProductCard";
+import ProductGrid from "@/component/products/ProductGrid";
+import { ProductCardData } from "@/component/products/ProductCard";
 
-const MOST_LOVED: ProductCardData[] = [
-  { id: "1", name: "Air Zip 270", price: 4200, image: "/images/products/air-zip-270.png", href: "/products/air-zip-270" },
-  { id: "2", name: "Stride OG 002", price: 4600, image: "/images/products/stride-og-002.png", href: "/products/stride-og-002" },
-  { id: "3", name: "New Chek 550", price: 3900, image: "/images/products/new-chek-550.png", href: "/products/new-chek-550" },
-  { id: "4", name: "Retro Jump 1", price: 5750, image: "/images/products/retro-jump-1.png", href: "/products/retro-jump-1" },
-  { id: "5", name: "Signature Runner", price: 4550, image: "/images/products/signature-runner.png", href: "/products/signature-runner" },
-];
+interface ApiProduct {
+  _id: string;
+  title: string;
+  price: number;
+  discountPrice?: number;
+  images: string[];
+  slug: string;
+}
 
-export default function MostLoved() {
+async function getMostLoved(): Promise<ProductCardData[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/products?featured=true&limit=5`,
+    { cache: "no-store" },
+  );
+  const data = await res.json();
+
+  return data.products.map((p: ApiProduct) => ({
+    id: p._id,
+    name: p.title,
+    price: p.discountPrice ?? p.price,
+    image: p.images[0],
+    href: `/products/${p.slug}`,
+  }));
+}
+
+export default async function MostLoved() {
+  const products = await getMostLoved();
+
   return (
     <section className="section-y bg-[var(--color-ivory)]">
       <div className="container-stridex">
@@ -32,21 +49,7 @@ export default function MostLoved() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-5">
-          {MOST_LOVED.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.2 }}
-              transition={{ duration: 0.6, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <ProductCard product={product} />
-            </motion.div>
-          ))}
-        </div>
-
-       
+        <ProductGrid products={products} />
       </div>
     </section>
   );

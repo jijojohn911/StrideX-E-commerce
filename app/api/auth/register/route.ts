@@ -47,6 +47,7 @@ export const POST = async (request: Request) => {
     const token = generateToken({
       userId: newUser._id.toString(),
       email: newUser.email,
+      role: newUser.role,
     });
 
     const response = NextResponse.json(
@@ -57,6 +58,7 @@ export const POST = async (request: Request) => {
           id: newUser._id,
           email: newUser.email,
           username: newUser.username,
+          role: newUser.role,
         },
       },
       { status: 201 }
@@ -73,11 +75,15 @@ export const POST = async (request: Request) => {
 
     return response;
   } catch (error) {
-    console.error("Registration Error:", error);
+  console.error("Registration Error:", error);
 
-    return NextResponse.json(
-      { success: false, message: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Internal Server Error",
+    },
+    { status: 500 }
+  );
+}
 };

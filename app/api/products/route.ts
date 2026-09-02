@@ -2,9 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import Product from "@/models/Product";
 import { createProductSchema } from "@/validations/product";
 import { connectDB } from "@/lib/mongodb";
+import { getAuthUser } from "@/lib/auth";
 
 export const POST = async (req: NextRequest) => {
   try {
+    const authUser = getAuthUser(req);
+    if (authUser?.role !== "admin") {
+      return NextResponse.json(
+        { success: false, message: authUser ? "Forbidden" : "Unauthorized" },
+        { status: authUser ? 403 : 401 },
+      );
+    }
+
     const body = await req.json();
 
     const result = createProductSchema.safeParse(body);
@@ -38,7 +47,7 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json(
       {
         success: true,
-       message: "Product created successfully",
+        message: "Product created successfully",
         product,
       },
       { status: 201 },
@@ -56,13 +65,25 @@ export const POST = async (req: NextRequest) => {
   }
 };
 
-export const GET = async () => {
+export const GET = async (req: NextRequest) => {
   try {
     await connectDB();
 
-    const products = await Product.find({
-      isActive: true,
-    }).sort({ createdAt: -1 });
+    const { searchParams } = new URL(req.url);
+    const featured = searchParams.get("featured");
+    const category = searchParams.get("category");
+    const gender = searchParams.get("gender");
+    const limit = parseInt(searchParams.get("limit") || "0", 10);
+
+    const query: Record<string, unknown> = { isActive: true };
+    if (featured === "true") query.featured = true;
+    if (category) query.category = category.toLowerCase();
+    if (gender) query.gender = gender;
+
+    let productsQuery = Product.find(query).sort({ createdAt: -1 });
+    if (limit > 0) productsQuery = productsQuery.limit(limit);
+
+    const products = await productsQuery;
 
     return NextResponse.json(
       {
@@ -76,10 +97,7 @@ export const GET = async () => {
     console.error(error);
 
     return NextResponse.json(
-      {
-        success: false,
-        message: "Internal Server Error",
-      },
+      { success: false, message: "Internal Server Error" },
       { status: 500 },
     );
   }

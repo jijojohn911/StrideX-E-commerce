@@ -15,6 +15,7 @@ interface ApiProduct {
   price: number;
   images: string[];
   slug: string;
+  discountPrice?:number;
 }
 
 export default function NewArrivals() {
@@ -24,7 +25,7 @@ export default function NewArrivals() {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       try {
-        const response = await fetch("/api/products");
+const response = await fetch("/api/products?limit=4");
 
         if (!response.ok) {
           throw new Error("Failed to fetch products");
@@ -32,16 +33,13 @@ export default function NewArrivals() {
 
         const data = await response.json();
 
-        const latestProducts = data.products
-          .slice(0, 4)
-          .map((product: ApiProduct) => ({
-            id: product._id,
-            name: product.title,
-            price: product.price,
-            image: product.images[0],
-            href: `/products/${product.slug}`,
-          }));
-
+     const latestProducts = data.products.map((product: ApiProduct) => ({
+  id: product._id,
+  name: product.title,
+  price: product.discountPrice ?? product.price,
+  image: product.images[0],
+  href: `/products/${product.slug}`,
+}));
         setProducts(latestProducts);
       } catch (error) {
         console.error("Failed to load new arrivals:", error);

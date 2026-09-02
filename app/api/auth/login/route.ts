@@ -51,10 +51,11 @@ export const POST = async (request: Request) => {
       );
     }
 
-    // Generate JWT
+       // Generate JWT
     const token = generateToken({
       userId: user._id.toString(),
       email: user.email,
+      role: user.role,
     });
 
     const response = NextResponse.json(
@@ -65,6 +66,7 @@ export const POST = async (request: Request) => {
           id: user._id,
           email: user.email,
           username: user.username,
+          role: user.role,
         },
       },
       { status: 200 },

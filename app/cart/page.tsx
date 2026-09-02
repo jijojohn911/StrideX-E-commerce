@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, X, ShoppingBag, ArrowRight } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 
 // Types — mirrors the populated Cart API response
 
@@ -13,6 +13,7 @@ interface Product {
   _id: string;
   title: string;
   price: number;
+  discountPrice?: number;
   slug: string;
   images?: string[];
   stock: number;
@@ -39,16 +40,20 @@ interface ApiResponse {
 const itemKey = (item: CartItem) =>
   `${item.product?._id ?? "unknown"}-${item.size}-${item.color}`;
 
+// Returns the price that should actually be charged for a product
+const getEffectivePrice = (product: Product) =>
+  product.discountPrice ?? product.price;
+
 const SHIPPING_LABEL = "Calculated at checkout";
 
 export default function CartPage() {
+  const router = useRouter();
   const [cart, setCart] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
 
- 
   const fetchCart = useCallback(async () => {
     try {
       const res = await fetch("/api/cart", { method: "GET" });
@@ -71,8 +76,6 @@ export default function CartPage() {
     }
   }, []);
 
-  // For manual retries (button click, not an effect) it's fine to
-  // setState synchronously before calling fetchCart.
   const retryFetch = () => {
     setIsLoading(true);
     setError(null);
@@ -86,12 +89,19 @@ export default function CartPage() {
     try {
       const res = await fetch("/api/cart", {
         method: "GET",
+        credentials: "include",
       });
+
+      // 🔴 Not logged in
+      if (res.status === 401) {
+        router.replace("/login");
+        return;
+      }
 
       const data: ApiResponse = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to load your cart");
+        throw new Error(data.message || "Failed to load cart");
       }
 
       if (!cancelled) {
@@ -103,7 +113,7 @@ export default function CartPage() {
         setError(
           err instanceof Error
             ? err.message
-            : "Something went wrong loading your cart",
+            : "Something went wrong loading your cart"
         );
       }
     } finally {
@@ -118,9 +128,10 @@ export default function CartPage() {
   return () => {
     cancelled = true;
   };
-}, []);
+}, [router]);
 
-  // ---------- update quantity ----------
+
+  //  update quantity 
   const updateQuantity = async (item: CartItem, nextQuantity: number) => {
     if (!item.product) return;
     if (nextQuantity < 1) return;
@@ -197,16 +208,12 @@ export default function CartPage() {
   const validItems = items.filter((item) => item.product !== null);
 
   const subtotal = validItems.reduce(
-    (sum, item) => sum + (item.product?.price ?? 0) * item.quantity,
+    (sum, item) =>
+      sum + getEffectivePrice(item.product as Product) * item.quantity,
     0,
   );
 
-  const formatPrice = (value: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value);
-
+  const formatPrice = (value: number) => `₹${value.toLocaleString("en-IN")}`;
 
   // Loading state
 
@@ -261,7 +268,6 @@ export default function CartPage() {
     );
   }
 
-
   // Empty cart
 
   if (validItems.length === 0) {
@@ -281,15 +287,12 @@ export default function CartPage() {
             />
           </div>
 
-          <p className="eyebrow mb-3 text-[var(--color-champagne)]">
-            Your Bag
-          </p>
+          <p className="eyebrow mb-3 text-[var(--color-champagne)]">Your Bag</p>
           <h1 className="display-headline mb-4 text-[clamp(2rem,4vw,2.75rem)] leading-[0.95] text-[var(--color-ink)]">
             Empty for now.
           </h1>
           <p className="mb-9 text-sm leading-6 text-[var(--color-stone)]">
-            Nothing here yet. Explore the collection and find your next
-            pair.
+            Nothing here yet. Explore the collection and find your next pair.
           </p>
 
           <Link href="/products" className="btn btn-primary group">
@@ -305,9 +308,8 @@ export default function CartPage() {
     );
   }
 
-  // ============================================================
   // Cart with items
-  // ============================================================
+
   return (
     <section className="min-h-[calc(100svh-76px)] bg-[var(--color-ivory)]">
       <div className="container-stridex py-16 lg:py-20">
@@ -335,6 +337,10 @@ export default function CartPage() {
                 const key = itemKey(item);
                 const isPending = pendingKey === key;
                 const imageSrc = product.images?.[0];
+                const unitPrice = getEffectivePrice(product);
+                const hasDiscount =
+                  product.discountPrice != null &&
+                  product.discountPrice < product.price;
 
                 return (
                   <motion.li
@@ -420,9 +426,16 @@ export default function CartPage() {
                           </button>
                         </div>
 
-                        <p className="text-sm font-medium text-[var(--color-ink)] sm:text-base">
-                          {formatPrice(product.price * item.quantity)}
-                        </p>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-[var(--color-ink)] sm:text-base">
+                            {formatPrice(unitPrice * item.quantity)}
+                          </p>
+                          {hasDiscount && (
+                            <p className="text-xs text-[var(--color-stone)] line-through">
+                              {formatPrice(product.price * item.quantity)}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </motion.li>

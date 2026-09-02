@@ -3,8 +3,11 @@
 import Image from "next/image";
 import { Heart, Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Product {
+  _id:string;
   title: string;
   description: string;
   brand: string;
@@ -26,6 +29,7 @@ interface ProductPageProps {
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,6 +55,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         setProduct(data.product);
       } catch (error) {
         console.error("Failed to fetch product:", error);
+        toast.error("Failed to load product");
       } finally {
         setLoading(false);
       }
@@ -105,28 +110,58 @@ export default function ProductPage({ params }: ProductPageProps) {
     setQuantity((prev) => Math.min(product.stock, prev + 1));
   };
 
-  const handleAddToBag = () => {
+  const handleAddToBag = async () => {
     if (!selectedSize) {
-      alert("Please select a size");
+      toast.error("Please select a size");
       return;
     }
 
     if (!selectedColor) {
-      alert("Please select a color");
+      toast.error("Please select a color");
       return;
     }
 
     if (product.stock <= 0) {
-      alert("This product is currently out of stock");
+      toast.error("This product is currently out of stock");
       return;
     }
 
-    console.log({
-      productId: product.slug,
-      size: selectedSize,
-      color: selectedColor,
-      quantity,
-    });
+  try {
+    const response = await fetch ("/api/cart",{
+      method:"POST",
+      headers:{
+        "Content-type":"application/json",
+      },
+      credentials:"include",
+      body:JSON.stringify({
+        productId:product._id,
+        size:selectedSize,
+        color:selectedColor,
+        quantity,
+    })
+  })
+
+  if(response.status === 401){
+    toast.error("Please log in to add items to your bag")
+    router.push("/login")
+    return;
+  }
+     
+    const data = await response.json();
+
+    if(!response.ok){
+      toast.error(data.message || "Failed to add product to cart")
+      return;
+
+    }
+
+    toast.success("Product added to cart")
+    router.push("/cart")
+   
+  } catch (error) {
+    console.error("Add to cart error",error)
+    toast.error("Something went wrong .Please try again.")
+  }
   };
 
   return (

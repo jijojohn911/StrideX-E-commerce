@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 export default function BrandStory() {
   return (
-    <section className="section-y bg-[var(--color-ivory)]">
+    <section className="section-y bg-ivory">
       <div className="container-stridex">
         <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
 
@@ -22,7 +22,7 @@ export default function BrandStory() {
             }}
             className="relative overflow-hidden rounded-3xl "
           >
-            <div className="relative aspect-[4/3]">
+            <div className="relative aspect-4/3">
               <Image
                 src="/images/premium-shoe.png"
                 alt="StrideX footwear philosophy"
@@ -44,17 +44,17 @@ export default function BrandStory() {
               ease: [0.16, 1, 0.3, 1],
             }}
           >
-            <p className="eyebrow mb-5 text-[var(--color-champagne)]">
+            <p className="eyebrow mb-5 text-(--color-champagne)">
               The StrideX Philosophy
             </p>
 
-            <h2 className="display-headline text-display-lg text-[var(--color-ink)]">
+            <h2 className="display-headline text-display-lg text-(--color-ink)">
               MOVE
               <br />
               WITH INTENT.
             </h2>
 
-            <p className="mt-7 max-w-md text-base leading-7 text-[var(--color-stone)]">
+            <p className="mt-7 max-w-md text-base leading-7 text-(--color-stone)">
               StrideX was created around a simple idea — movement should feel
               effortless. We combine considered design, premium materials, and
               everyday performance to create footwear made for wherever you go.
@@ -62,7 +62,7 @@ export default function BrandStory() {
 
             <Link
               href="/about"
-              className="group mt-8 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink)]"
+              className="group mt-8 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-(--color-ink)"
             >
               Our Story
 
