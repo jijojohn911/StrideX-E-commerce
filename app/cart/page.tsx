@@ -219,27 +219,27 @@ export default function CartPage() {
 
   if (isLoading) {
     return (
-      <section className="min-h-[calc(100svh-76px)] bg-[var(--color-ivory)]">
+      <section className="min-h-[calc(100svh-76px)] bg-(--color-ivory)">
         <div className="container-stridex py-16 lg:py-20">
-          <div className="mb-12 h-10 w-48 animate-pulse rounded bg-[var(--color-stone)]/20" />
+          <div className="mb-12 h-10 w-48 animate-pulse rounded bg-stone/20" />
 
           <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr]">
             <div className="space-y-6">
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="flex gap-5 border-b border-[var(--color-stone)]/20 pb-6"
+                  className="flex gap-5 border-b border-stone/20 pb-6"
                 >
-                  <div className="h-28 w-28 shrink-0 animate-pulse rounded bg-[var(--color-stone)]/20 sm:h-32 sm:w-32" />
+                  <div className="h-28 w-28 shrink-0 animate-pulse rounded bg-stone/20 sm:h-32 sm:w-32" />
                   <div className="flex-1 space-y-3 py-1">
-                    <div className="h-4 w-2/3 animate-pulse rounded bg-[var(--color-stone)]/20" />
-                    <div className="h-3 w-1/3 animate-pulse rounded bg-[var(--color-stone)]/20" />
-                    <div className="h-3 w-1/4 animate-pulse rounded bg-[var(--color-stone)]/20" />
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-stone/20" />
+                    <div className="h-3 w-1/3 animate-pulse rounded bg-stone/20" />
+                    <div className="h-3 w-1/4 animate-pulse rounded bg-stone/20" />
                   </div>
                 </div>
               ))}
             </div>
-            <div className="h-64 animate-pulse rounded bg-[var(--color-stone)]/20" />
+            <div className="h-64 animate-pulse rounded bg-stone/20" />
           </div>
         </div>
       </section>
@@ -250,12 +250,12 @@ export default function CartPage() {
 
   if (error) {
     return (
-      <section className="flex min-h-[calc(100svh-76px)] items-center justify-center bg-[var(--color-ivory)]">
+      <section className="flex min-h-[calc(100svh-76px)] items-center justify-center bg-(--color-ivory)">
         <div className="text-center">
-          <p className="eyebrow mb-3 text-[var(--color-champagne)]">
+          <p className="eyebrow mb-3 text-(--color-champagne)">
             Something went wrong
           </p>
-          <h1 className="mb-6 text-2xl text-[var(--color-ink)]">{error}</h1>
+          <h1 className="mb-6 text-2xl text-(--color-ink)">{error}</h1>
           <button
             onClick={retryFetch}
             className="btn btn-primary"
@@ -272,26 +272,26 @@ export default function CartPage() {
 
   if (validItems.length === 0) {
     return (
-      <section className="flex min-h-[calc(100svh-76px)] items-center justify-center bg-[var(--color-ivory)]">
+      <section className="flex min-h-[calc(100svh-76px)] items-center justify-center bg-(--color-ivory)">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto max-w-md px-6 text-center"
         >
-          <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--color-stone)]">
+          <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full border border-(--color-stone)">
             <ShoppingBag
               size={24}
               strokeWidth={1.25}
-              className="text-[var(--color-ink)]"
+              className="text-(--color-ink)"
             />
           </div>
 
-          <p className="eyebrow mb-3 text-[var(--color-champagne)]">Your Bag</p>
-          <h1 className="display-headline mb-4 text-[clamp(2rem,4vw,2.75rem)] leading-[0.95] text-[var(--color-ink)]">
+          <p className="eyebrow mb-3 text-(--color-champagne)">Your Bag</p>
+          <h1 className="display-headline mb-4 text-[clamp(2rem,4vw,2.75rem)] leading-[0.95] text-(--color-ink)">
             Empty for now.
           </h1>
-          <p className="mb-9 text-sm leading-6 text-[var(--color-stone)]">
+          <p className="mb-9 text-sm leading-6 text-(--color-stone)">
             Nothing here yet. Explore the collection and find your next pair.
           </p>
 
@@ -311,26 +311,26 @@ export default function CartPage() {
   // Cart with items
 
   return (
-    <section className="min-h-[calc(100svh-76px)] bg-[var(--color-ivory)]">
+    <section className="min-h-[calc(100svh-76px)] bg-ivory">
       <div className="container-stridex py-16 lg:py-20">
         <div className="mb-10 lg:mb-14">
-          <p className="eyebrow mb-3 text-[var(--color-champagne)]">
+          <p className="eyebrow mb-3 text-(--color-champagne)">
             {validItems.length} {validItems.length === 1 ? "Item" : "Items"}
           </p>
-          <h1 className="display-headline text-[clamp(2rem,4vw,2.75rem)] leading-[0.95] text-[var(--color-ink)]">
+          <h1 className="display-headline text-[clamp(2rem,4vw,2.75rem)] leading-[0.95] text-(--color-ink)">
             Your Bag
           </h1>
         </div>
 
         {actionError && (
-          <div className="mb-8 border border-[var(--color-champagne)]/40 bg-[var(--color-champagne)]/5 px-4 py-3 text-sm text-[var(--color-ink)]">
+          <div className="mb-8 border border-champagne/40 bg-champagne/5 px-4 py-3 text-sm text-(--color-ink)">
             {actionError}
           </div>
         )}
 
         <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr] lg:items-start">
           {/* ---------- Line items ---------- */}
-          <ul className="divide-y divide-[var(--color-stone)]/20">
+          <ul className="divide-y divide-stone/20">
             <AnimatePresence initial={false}>
               {validItems.map((item) => {
                 const product = item.product as Product;
@@ -353,7 +353,7 @@ export default function CartPage() {
                     className="flex gap-5 py-7 first:pt-0 sm:gap-7"
                   >
                     {/* Image */}
-                    <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded bg-[var(--color-stone)]/10 sm:h-32 sm:w-32">
+                    <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded bg-stone/10 sm:h-32 sm:w-32">
                       {imageSrc ? (
                         <Image
                           src={imageSrc}
@@ -363,7 +363,7 @@ export default function CartPage() {
                           className="object-contain p-3"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[var(--color-stone)]">
+                        <div className="flex h-full w-full items-center justify-center text-(--color-stone)">
                           <ShoppingBag size={22} strokeWidth={1.25} />
                         </div>
                       )}
@@ -373,10 +373,10 @@ export default function CartPage() {
                     <div className="flex flex-1 flex-col justify-between">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h2 className="text-sm font-medium text-[var(--color-ink)] sm:text-base">
+                          <h2 className="text-sm font-medium text-(--color-ink) sm:text-base">
                             {product.title}
                           </h2>
-                          <p className="mt-1 text-xs text-[var(--color-stone)] sm:text-sm">
+                          <p className="mt-1 text-xs text-(--color-stone) sm:text-sm">
                             Size {item.size} · {item.color}
                           </p>
                         </div>
@@ -386,7 +386,7 @@ export default function CartPage() {
                           onClick={() => removeItem(item)}
                           disabled={isPending}
                           aria-label="Remove item"
-                          className="shrink-0 text-[var(--color-stone)] transition-colors duration-300 hover:text-[var(--color-ink)] disabled:opacity-40"
+                          className="shrink-0 text-(--color-stone) transition-colors duration-300 hover:text-(--color-ink) disabled:opacity-40"
                         >
                           <X size={16} strokeWidth={1.5} />
                         </button>
@@ -394,7 +394,7 @@ export default function CartPage() {
 
                       <div className="mt-4 flex items-end justify-between gap-4">
                         {/* Quantity stepper */}
-                        <div className="flex items-center border border-[var(--color-stone)]">
+                        <div className="flex items-center border border-(--color-stone)">
                           <button
                             type="button"
                             onClick={() =>
@@ -402,12 +402,12 @@ export default function CartPage() {
                             }
                             disabled={isPending || item.quantity <= 1}
                             aria-label="Decrease quantity"
-                            className="flex h-9 w-9 items-center justify-center text-[var(--color-ink)] transition-colors duration-300 hover:bg-[var(--color-stone)]/10 disabled:opacity-30"
+                            className="flex h-9 w-9 items-center justify-center text-(--color-ink) transition-colors duration-300 hover:bg-stone/10 disabled:opacity-30"
                           >
                             <Minus size={13} strokeWidth={1.5} />
                           </button>
 
-                          <span className="w-8 text-center text-sm text-[var(--color-ink)]">
+                          <span className="w-8 text-center text-sm text-(--color-ink)">
                             {item.quantity}
                           </span>
 
@@ -420,18 +420,18 @@ export default function CartPage() {
                               isPending || item.quantity >= product.stock
                             }
                             aria-label="Increase quantity"
-                            className="flex h-9 w-9 items-center justify-center text-[var(--color-ink)] transition-colors duration-300 hover:bg-[var(--color-stone)]/10 disabled:opacity-30"
+                            className="flex h-9 w-9 items-center justify-center text-(--color-ink) transition-colors duration-300 hover:bg-stone/10 disabled:opacity-30"
                           >
                             <Plus size={13} strokeWidth={1.5} />
                           </button>
                         </div>
 
                         <div className="text-right">
-                          <p className="text-sm font-medium text-[var(--color-ink)] sm:text-base">
+                          <p className="text-sm font-medium text-(--color-ink) sm:text-base">
                             {formatPrice(unitPrice * item.quantity)}
                           </p>
                           {hasDiscount && (
-                            <p className="text-xs text-[var(--color-stone)] line-through">
+                            <p className="text-xs text-(--color-stone) line-through">
                               {formatPrice(product.price * item.quantity)}
                             </p>
                           )}
@@ -449,28 +449,28 @@ export default function CartPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="border border-[var(--color-stone)]/30 p-7 lg:sticky lg:top-24"
+            className="border border-stone/30 p-7 lg:sticky lg:top-24"
           >
-            <p className="eyebrow mb-6 text-[var(--color-champagne)]">
+            <p className="eyebrow mb-6 text-(--color-champagne)">
               Order Summary
             </p>
 
             <div className="space-y-4 text-sm">
-              <div className="flex items-center justify-between text-[var(--color-ink)]">
-                <span className="text-[var(--color-stone)]">Subtotal</span>
+              <div className="flex items-center justify-between text-(--color-ink)">
+                <span className="text-(--color-stone)">Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
-              <div className="flex items-center justify-between text-[var(--color-ink)]">
-                <span className="text-[var(--color-stone)]">Shipping</span>
-                <span className="text-[var(--color-stone)]">
+              <div className="flex items-center justify-between text-(--color-ink)">
+                <span className="text-(--color-stone)">Shipping</span>
+                <span className="text-(--color-stone)">
                   {SHIPPING_LABEL}
                 </span>
               </div>
             </div>
 
-            <div className="my-6 h-px bg-[var(--color-stone)]/20" />
+            <div className="my-6 h-px bg-stone/20" />
 
-            <div className="mb-8 flex items-center justify-between text-[var(--color-ink)]">
+            <div className="mb-8 flex items-center justify-between text-(--color-ink)">
               <span className="text-sm">Total</span>
               <span className="text-lg font-medium">
                 {formatPrice(subtotal)}

@@ -3,6 +3,34 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+interface RazorpayPaymentResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayOptions {
+  key: string | undefined;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayPaymentResponse) => void;
+  modal: {
+    ondismiss: () => void;
+  };
+  theme: {
+    color: string;
+  };
+}
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => { open: () => void };
+  }
+}
+
 interface Address {
   _id: string;
   fullName: string;
@@ -90,17 +118,17 @@ export default function CheckoutPage() {
       if (defaultAddr) setSelectedAddressId(defaultAddr._id);
       if (addrList.length === 0) setShowAddForm(true);
     } catch (error) {
-      console.error(error)
+      console.error(error);
       setError("Failed to load checkout details");
     } finally {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadCheckoutData();
-  }, []);
+useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  loadCheckoutData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   function handleNewAddressChange(e: React.ChangeEvent<HTMLInputElement>) {
     setNewAddress({ ...newAddress, [e.target.name]: e.target.value });
@@ -140,7 +168,7 @@ export default function CheckoutPage() {
         country: "India",
       });
     } catch (err) {
-      console.error(err)
+      console.error(err);
       setError("Something went wrong while saving address");
     } finally {
       setAddingAddress(false);
@@ -156,27 +184,97 @@ export default function CheckoutPage() {
     }
 
     setPlacing(true);
-    try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          addressId: selectedAddressId,
-          paymentMethod,
-        }),
-      });
 
+    if (paymentMethod === "cod") {
+      try {
+        const res = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            addressId: selectedAddressId,
+            paymentMethod: "cod",
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.message || "Failed to place order");
+          setPlacing(false);
+          return;
+        }
+
+        router.push(`/order/${data.order._id}`);
+      } catch (err) {
+        console.error(err);
+        setError("Something went wrong. Please try again.");
+        setPlacing(false);
+      }
+      return;
+    }
+
+    // Razorpay flow
+    try {
+      const res = await fetch("/api/orders/razorpay", { method: "POST" });
       const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.message || "Failed to place order");
+      if (!res.ok || !data.success) {
+        setError(data.message || "Failed to initiate payment");
         setPlacing(false);
         return;
       }
 
-      router.push(`/order/${data.order._id}`);
+      const { razorpayOrder } = data;
+
+      const options: RazorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        name: "StrideX",
+        description: "Order Payment",
+        order_id: razorpayOrder.id,
+        handler: async function (response: RazorpayPaymentResponse) {
+          try {
+            const verifyRes = await fetch("/api/orders/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                addressId: selectedAddressId,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (!verifyRes.ok || !verifyData.success) {
+              setError(verifyData.message || "Payment verification failed");
+              setPlacing(false);
+              return;
+            }
+
+            router.push(`/order/${verifyData.order._id}`);
+          } catch (err) {
+            console.error(err);
+            setError("Payment verification failed. Please contact support.");
+            setPlacing(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setPlacing(false);
+          },
+        },
+        theme: {
+          color: "#0b0b0c",
+        },
+      };
+
+      const razorpayInstance = new window.Razorpay(options);
+      razorpayInstance.open();
     } catch (err) {
-        console.error(err)
+      console.error(err);
       setError("Something went wrong. Please try again.");
       setPlacing(false);
     }
@@ -252,7 +350,8 @@ export default function CheckoutPage() {
                             {addr.addressLine1}
                             {addr.addressLine2
                               ? `, ${addr.addressLine2}`
-                              : ""}, {addr.city}, {addr.state} - {addr.pincode},{" "}
+                              : ""}
+                            , {addr.city}, {addr.state} - {addr.pincode},{" "}
                             {addr.country}
                           </p>
                         </div>

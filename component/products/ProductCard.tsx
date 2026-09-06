@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 
 export interface ProductCardData {
   id: string;
@@ -16,6 +18,74 @@ export interface ProductCardData {
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isToggling,setIsToggling] = useState (false);
+
+  useEffect(()=>{
+    async function checkWishlistStatus(){
+      try {
+        const res = await fetch("/api/wishlist");
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const wishlistedIds: string[] = (data.products ?? []).map(
+          (p: { _id: string }) => p._id
+        );
+
+        if (wishlistedIds.includes(product.id)){
+          setIsWishlisted(true);
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+   
+    checkWishlistStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleWishlistToggle(e:React.MouseEvent){
+    e.preventDefault();
+
+    if(isToggling) return;
+    setIsToggling(true);
+
+    const previousStatus = isWishlisted;
+    setIsWishlisted(!previousStatus);
+
+    try {
+      const res = await fetch("/api/wishlist",{
+        method:"POST",
+        headers:{"Content-Type": "application/json"},
+        body:JSON.stringify({productId:product.id})
+      });
+
+      if(res.status === 401){
+        setIsWishlisted(previousStatus);
+        toast.error("Please log in to save items to your wishlist")
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!res.ok){
+        setIsWishlisted(previousStatus);
+        toast.error(data.message || "Failed to update wishlist");
+        return;
+      }
+
+      setIsWishlisted(data.isWishlisted );
+      toast.success(
+        data.isWishlisted ? "Added to wishlist" : "Removed from wishlist"
+      );
+    } catch (error) {
+      console.error(error);
+      setIsWishlisted(previousStatus);
+      toast.error("Something went wrong")
+    }finally{
+      setIsToggling(false)
+    }
+  }
 
   return (
     <div className="group">
@@ -39,11 +109,9 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
           <button
             type="button"
             aria-label="Add to wishlist"
-            onClick={(e) => {
-              e.preventDefault();
-              setIsWishlisted((prev) => !prev);
-            }}
-            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-(--color-ivory) text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne)"
+            onClick={handleWishlistToggle}
+            disabled={isToggling}
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-(--color-ivory) text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) disabled:opacity-60"
           >
             <Heart
               size={15}

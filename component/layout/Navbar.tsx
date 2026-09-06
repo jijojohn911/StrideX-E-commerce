@@ -28,11 +28,7 @@ type UserData = {
   email: string;
 };
 
-export default function Navbar({
-  cartCount = 0,
-}: {
-  cartCount?: number;
-}) {
+export default function Navbar({ cartCount = 0 }: { cartCount?: number }) {
   const router = useRouter();
 
   const [isScrolled, setIsScrolled] = useState(false);
@@ -135,9 +131,7 @@ export default function Navbar({
 
   return (
     <>
-      {/* =====================================
-          DESKTOP / MAIN NAVBAR
-      ====================================== */}
+      {/* DESKTOP / MAIN NAVBAR*/}
       <header
         className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-500 ${
           isScrolled
@@ -155,9 +149,7 @@ export default function Navbar({
             <span className="text-(--color-champagne)">X</span>
           </Link>
 
-          {/* =====================================
-              DESKTOP NAV LINKS
-          ====================================== */}
+          {/* DESKTOP NAV LINKS*/}
           <nav className="hidden items-center gap-9 lg:flex">
             {NAV_LINKS.map((link) => (
               <Link
@@ -191,55 +183,63 @@ export default function Navbar({
             </button>
 
             {/* ACCOUNT */}
-           {!isLoadingUser && (
-  <>
-    {user ? (
-      <>
-        {/* ACCOUNT */}
-        <Link
-          href="/account"
-          className="hidden items-center gap-2 text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
-        >
-          <UserIcon size={19} strokeWidth={1.5} />
-          <span className="eyebrow">Account</span>
-        </Link>
+            {!isLoadingUser && (
+              <>
+                {user ? (
+                  <>
+                    {/* ACCOUNT */}
+                    <Link
+                      href="/account"
+                      className="hidden items-center gap-2 text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
+                    >
+                      <UserIcon size={19} strokeWidth={1.5} />
+                      <span className="eyebrow">Account</span>
+                    </Link>
+                    {/* my orders */}
+                    <Link
+                      href="/orders"
+                      className="hidden items-center gap-2 text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
+                    >
+                      <span className="eyebrow">My Orders</span>
+                    </Link>
 
-        {/* LOGOUT */}
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="hidden items-center gap-2 text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
-        >
-          <LogOut size={18} strokeWidth={1.5} />
-          <span className="eyebrow">Logout</span>
-        </button>
-      </>
-    ) : (
-      <>
-        {/* LOGIN */}
-        <Link
-          href="/login"
-          className="hidden items-center gap-2 text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
-        >
-          <UserIcon size={19} strokeWidth={1.5} />
-          <span className="eyebrow">Login</span>
-        </Link>
+                    {/* LOGOUT */}
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="hidden items-center gap-2 text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
+                    >
+                      <LogOut size={18} strokeWidth={1.5} />
+                      <span className="eyebrow">Logout</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* LOGIN */}
+                    <Link
+                      href="/login"
+                      className="hidden items-center gap-2 text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
+                    >
+                      <UserIcon size={19} strokeWidth={1.5} />
+                      <span className="eyebrow">Login</span>
+                    </Link>
 
-        {/* REGISTER */}
-        <Link
-          href="/register"
-          className="hidden text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
-        >
-          <span className="eyebrow">Register</span>
-        </Link>
-      </>
-    )}
-  </>
-)}
+                    {/* REGISTER */}
+                    <Link
+                      href="/register"
+                      className="hidden text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) lg:inline-flex"
+                    >
+                      <span className="eyebrow">Register</span>
+                    </Link>
+                  </>
+                )}
+              </>
+            )}
 
             {/* SHOPPING BAG */}
-            <button
-              type="button"
+
+            <Link
+              href="/cart"
               aria-label={`Bag, ${cartCount} items`}
               className="relative text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne)"
             >
@@ -250,7 +250,7 @@ export default function Navbar({
                   {cartCount}
                 </span>
               )}
-            </button>
+            </Link>
 
             {/* MOBILE MENU */}
             <button
@@ -366,9 +366,7 @@ function MobileDrawer({
           {/*ACCOUNT SECTION */}
           <div className="container-stridex flex items-center gap-6 border-t border-[rgb(255_255_255/0.12)] py-6">
             {isLoadingUser ? (
-              <span className="eyebrow text-(--color-stone)">
-                Loading...
-              </span>
+              <span className="eyebrow text-(--color-stone)">Loading...</span>
             ) : user ? (
               <>
                 {/* ACCOUNT */}
@@ -378,6 +376,14 @@ function MobileDrawer({
                   className="eyebrow text-(--color-stone) transition-colors duration-300 hover:text-(--color-champagne)"
                 >
                   Account
+                </Link>
+
+                <Link
+                  href="/orders"
+                  onClick={onClose}
+                  className="eyebrow text-(--color-stone) transition-colors duration-300 hover:text-(--color-champagne)"
+                >
+                  My Orders
                 </Link>
 
                 {/* LOGOUT */}

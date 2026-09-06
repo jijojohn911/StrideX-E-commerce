@@ -1,44 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { connectDB } from "@/lib/mongodb";
-import { getAuthUser, JwtPayload } from "@/lib/auth";
-import Cart, { ICart } from "@/models/Cart";
+import { getAuthUser } from "@/lib/auth";
+import Cart from "@/models/Cart";
 import Order from "@/models/Order";
 import Address from "@/models/Address";
-import Product,{IProduct} from "@/models/Product";
+import Product, { IProduct } from "@/models/Product";
+import { JwtPayload } from "jsonwebtoken";
 
-
-// POST — create an order from the user's cart
 export const POST = async (req: NextRequest) => {
   try {
     await connectDB();
 
     const user: JwtPayload | null = await getAuthUser(req);
-
     if (!user) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const body = await req.json();
-    const { addressId, paymentMethod } = body;
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      addressId,
+    } = body;
 
-    if (!addressId) {
+    if (
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature ||
+      !addressId
+    ) {
       return NextResponse.json(
-        { success: false, message: "Shipping address is required" },
-        { status: 400 }
+        { success: false, message: "Missing payment details" },
+        { status: 400 },
       );
     }
 
-    if (!paymentMethod || !["cod", "razorpay"].includes(paymentMethod)) {
+    // Verify signature
+    const generatedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (generatedSignature !== razorpay_signature) {
       return NextResponse.json(
-        { success: false, message: "Valid payment method is required" },
-        { status: 400 }
+        { success: false, message: "Payment verification failed" },
+        { status: 400 },
       );
     }
 
-    // Get the address 
+    // Signature valid
     const address = await Address.findOne({
       _id: addressId,
       user: user.userId,
@@ -47,29 +62,26 @@ export const POST = async (req: NextRequest) => {
     if (!address) {
       return NextResponse.json(
         { success: false, message: "Address not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    //  Get the cart, populated with product details
-    const cart: ICart | null = await Cart.findOne({
-      user: user.userId,
-    }).populate("items.product");
+    const cart = await Cart.findOne({ user: user.userId }).populate(
+      "items.product",
+    );
 
     if (!cart || cart.items.length === 0) {
       return NextResponse.json(
         { success: false, message: "Your cart is empty" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    //  Validate stock and build order items
     const orderItems = [];
     let subtotal = 0;
 
     for (const item of cart.items) {
-      // populate() makes item.product the full Product doc here
-const product = item.product as unknown as IProduct;
+      const product = item.product as unknown as IProduct;
 
       if (!product || !product.isActive) {
         return NextResponse.json(
@@ -77,7 +89,7 @@ const product = item.product as unknown as IProduct;
             success: false,
             message: `"${product?.title ?? "A product"}" is no longer available`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -87,7 +99,7 @@ const product = item.product as unknown as IProduct;
             success: false,
             message: `Not enough stock for "${product.title}"`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -105,14 +117,10 @@ const product = item.product as unknown as IProduct;
       subtotal += effectivePrice * item.quantity;
     }
 
-    //  Shipping + total
-    const shippingFee = subtotal >= 999 ? 0 : 79; 
+    const shippingFee = subtotal >= 999 ? 0 : 79;
     const totalAmount = subtotal + shippingFee;
-
-    //  Generate a unique order number
     const orderNumber = `SX${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
-    //  Create the order
     const order = await Order.create({
       user: user.userId,
       orderNumber,
@@ -131,13 +139,14 @@ const product = item.product as unknown as IProduct;
       shippingFee,
       totalAmount,
       payment: {
-        method: paymentMethod,
-        status: paymentMethod === "cod" ? "pending" : "pending",
+        method: "razorpay",
+        status: "paid",
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
       },
-      orderStatus: "confirmed"
+      orderStatus: "confirmed",
     });
 
-    //  Decrement stock for each product
     for (const item of cart.items) {
       const product = item.product as unknown as IProduct;
       await Product.findByIdAndUpdate(product._id, {
@@ -145,47 +154,18 @@ const product = item.product as unknown as IProduct;
       });
     }
 
-    //  Clear the cart
     cart.items = [];
     await cart.save();
 
     return NextResponse.json(
-      { success: true, message: "Order placed successfully", order },
-      { status: 201 }
+      { success: true, message: "Payment verified, order placed", order },
+      { status: 201 },
     );
   } catch (error) {
-    console.error("Order POST error:", error);
+    console.error("Payment verification error", error);
     return NextResponse.json(
       { success: false, message: "Something went wrong" },
-      { status: 500 }
-    );
-  }
-};
-
-// GET — list the logged-in user's orders
-export const GET = async (req: NextRequest) => {
-  try {
-    await connectDB();
-
-    const user: JwtPayload | null = await getAuthUser(req);
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const orders = await Order.find({ user: user.userId }).sort({
-      createdAt: -1,
-    });
-
-    return NextResponse.json({ success: true, orders });
-  } catch (error) {
-    console.error("Order GET error:", error);
-    return NextResponse.json(
-      { success: false, message: "Something went wrong" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };
