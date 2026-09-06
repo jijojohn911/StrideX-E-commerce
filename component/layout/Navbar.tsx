@@ -13,6 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import SearchModal from "./SearchModal";
 
 const NAV_LINKS = [
   { label: "MEN", href: "/men" },
@@ -35,10 +36,10 @@ export default function Navbar({ cartCount = 0 }: { cartCount?: number }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // ---------------------------------------
   // CHECK LOGGED-IN USER
-  // ---------------------------------------
+
   useEffect(() => {
     let cancelled = false;
 
@@ -77,9 +78,8 @@ export default function Navbar({ cartCount = 0 }: { cartCount?: number }) {
     };
   }, []);
 
-  // ---------------------------------------
   // SCROLL EFFECT
-  // ---------------------------------------
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
@@ -94,9 +94,8 @@ export default function Navbar({ cartCount = 0 }: { cartCount?: number }) {
     };
   }, []);
 
-  // ---------------------------------------
   // PREVENT BODY SCROLL WHEN DRAWER OPEN
-  // ---------------------------------------
+
   useEffect(() => {
     document.body.style.overflow = isDrawerOpen ? "hidden" : "";
 
@@ -105,9 +104,8 @@ export default function Navbar({ cartCount = 0 }: { cartCount?: number }) {
     };
   }, [isDrawerOpen]);
 
-  // ---------------------------------------
   // LOGOUT
-  // ---------------------------------------
+
   const handleLogout = async () => {
     try {
       const response = await fetch("/api/auth/logout", {
@@ -168,19 +166,20 @@ export default function Navbar({ cartCount = 0 }: { cartCount?: number }) {
             <button
               type="button"
               aria-label="Search"
+              onClick={() => setIsSearchOpen(true)}
               className="text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne)"
             >
               <Search size={19} strokeWidth={1.5} />
             </button>
 
             {/* WISHLIST */}
-            <button
-              type="button"
+            <Link
+              href="/wishlist"
               aria-label="Wishlist"
               className="hidden text-(--color-ink) transition-colors duration-300 hover:text-(--color-champagne) md:inline-flex"
             >
               <Heart size={19} strokeWidth={1.5} />
-            </button>
+            </Link>
 
             {/* ACCOUNT */}
             {!isLoadingUser && (
@@ -272,6 +271,10 @@ export default function Navbar({ cartCount = 0 }: { cartCount?: number }) {
         user={user}
         isLoadingUser={isLoadingUser}
         onLogout={handleLogout}
+      />
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
       />
     </>
   );

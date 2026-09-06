@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import ProductCard, { ProductCardData } from "./ProductCard";
 
-
 interface ApiProduct {
   _id: string;
   title: string;
@@ -20,6 +19,8 @@ interface ProductListingProps {
   description: string;
 }
 
+const AVAILABLE_SIZES = ["6", "7", "8", "9", "10", "11"];
+
 export default function ProductListing({
   gender,
   eyebrow,
@@ -30,11 +31,19 @@ export default function ProductListing({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [sort, setSort] = useState("newest");
+  const [sizeFilter, setSizeFilter] = useState("");
+
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const query = gender ? `?gender=${gender}` : "";
-        const response = await fetch(`/api/products${query}`);
+        const params = new URLSearchParams();
+        if (gender) params.set("gender", gender);
+        if (sizeFilter) params.set("size", sizeFilter);
+        if (sort) params.set("sort", sort);
+
+        const response = await fetch(`/api/products?${params.toString()}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch products");
@@ -58,7 +67,7 @@ export default function ProductListing({
       }
     };
     fetchProducts();
-  }, [gender]);
+  }, [gender, sort, sizeFilter]);
 
   return (
     <div className="bg-ivory">
@@ -69,11 +78,63 @@ export default function ProductListing({
             <h1 className="display-headline text-display-lg text-ink">
               {title}
             </h1>
-
             <p className="mt-4 max-w-md text-sm leading-6 text-stone">
               {description}
             </p>
           </div>
+
+          {/* Filter/Sort bar */}
+          <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-stone-light pb-6">
+            {/* Sort */}
+            <div className="flex items-center gap-2">
+              <label htmlFor="sort" className="text-caption text-stone">
+                Sort by
+              </label>
+              <select
+                id="sort"
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className="border border-stone-light rounded-md px-3 py-2 text-caption text-ink bg-white"
+              >
+                <option value="newest">Newest</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+              </select>
+            </div>
+
+            {/* Size filter */}
+            <div className="flex items-center gap-2">
+              <span className="text-caption text-stone">Size</span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSizeFilter("")}
+                  className={`h-8 px-3 rounded-full border text-caption transition-colors duration-300 ${
+                    sizeFilter === ""
+                      ? "border-ink bg-ink text-ivory"
+                      : "border-stone-light text-ink hover:border-ink"
+                  }`}
+                >
+                  All
+                </button>
+                {AVAILABLE_SIZES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSizeFilter(s)}
+                    className={`h-8 w-8 rounded-full border text-caption transition-colors duration-300 ${
+                      sizeFilter === s
+                        ? "border-ink bg-ink text-ivory"
+                        : "border-stone-light text-ink hover:border-ink"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {!loading && error && (
             <p className="py-12 text-sm text-red-500">{error}</p>
           )}
