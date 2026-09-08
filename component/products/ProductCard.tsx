@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-
 export interface ProductCardData {
   id: string;
   name: string;
@@ -18,72 +17,71 @@ export interface ProductCardData {
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [isToggling,setIsToggling] = useState (false);
+  const [isToggling, setIsToggling] = useState(false);
 
-  useEffect(()=>{
-    async function checkWishlistStatus(){
+  useEffect(() => {
+    async function checkWishlistStatus() {
       try {
         const res = await fetch("/api/wishlist");
         if (!res.ok) return;
 
         const data = await res.json();
         const wishlistedIds: string[] = (data.products ?? []).map(
-          (p: { _id: string }) => p._id
+          (p: { _id: string }) => p._id,
         );
 
-        if (wishlistedIds.includes(product.id)){
+        if (wishlistedIds.includes(product.id)) {
           setIsWishlisted(true);
         }
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
 
-   
     checkWishlistStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleWishlistToggle(e:React.MouseEvent){
+  async function handleWishlistToggle(e: React.MouseEvent) {
     e.preventDefault();
 
-    if(isToggling) return;
+    if (isToggling) return;
     setIsToggling(true);
 
     const previousStatus = isWishlisted;
     setIsWishlisted(!previousStatus);
 
     try {
-      const res = await fetch("/api/wishlist",{
-        method:"POST",
-        headers:{"Content-Type": "application/json"},
-        body:JSON.stringify({productId:product.id})
+      const res = await fetch("/api/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id }),
       });
 
-      if(res.status === 401){
+      if (res.status === 401) {
         setIsWishlisted(previousStatus);
-        toast.error("Please log in to save items to your wishlist")
+        toast.error("Please log in to save items to your wishlist");
         return;
       }
 
       const data = await res.json();
 
-      if (!res.ok){
+      if (!res.ok) {
         setIsWishlisted(previousStatus);
         toast.error(data.message || "Failed to update wishlist");
         return;
       }
 
-      setIsWishlisted(data.isWishlisted );
+      setIsWishlisted(data.isWishlisted);
       toast.success(
-        data.isWishlisted ? "Added to wishlist" : "Removed from wishlist"
+        data.isWishlisted ? "Added to wishlist" : "Removed from wishlist",
       );
     } catch (error) {
       console.error(error);
       setIsWishlisted(previousStatus);
-      toast.error("Something went wrong")
-    }finally{
-      setIsToggling(false)
+      toast.error("Something went wrong");
+    } finally {
+      setIsToggling(false);
     }
   }
 
@@ -126,20 +124,22 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       <div className="mt-4 flex items-start justify-between gap-2">
         <div>
           <Link href={product.href}>
-            <p className="text-sm font-medium text-(--color-ink)">{product.name}</p>
+            <p className="text-sm font-medium text-(--color-ink)">
+              {product.name}
+            </p>
           </Link>
           <p className="mt-1 text-sm text-(--color-stone)">
             ₹{product.price.toLocaleString("en-IN")}
           </p>
         </div>
 
-        <button
-          type="button"
-          aria-label={`Add ${product.name} to bag`}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-(--color-stone-light) text-(--color-ink) transition-colors duration-300 hover:border-(--color-champagne) hover:text-(--color-champagne)"
+        <Link
+          href={product.href}
+          aria-label={`View ${product.name}`}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-stone-light text-ink transition-colors duration-300 hover:border-champagne hover:text-champagne"
         >
           <ShoppingBag size={14} strokeWidth={1.5} />
-        </button>
+        </Link>
       </div>
     </div>
   );

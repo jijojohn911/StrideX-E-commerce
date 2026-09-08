@@ -7,7 +7,7 @@ import "@/app/globals.css";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-[calc(100svh-76px)] overflow-hidden bg-[var(--color-ivory)] text-[var(--color-ink)]">
+    <section className="relative min-h-[calc(100svh-76px)] overflow-hidden bg-(--color-ivory) text-(--color-ink)">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_45%,rgba(195,160,107,0.08),transparent_45%)]" />
       <div className="container-stridex relative z-10 flex min-h-[calc(100svh-76px)] items-center">
         <div className="grid w-full items-center gap-10 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-4 lg:py-20">
@@ -34,7 +34,7 @@ const Hero = () => {
             <div className="mt-9 mb-5 flex flex-col items-start gap-4 sm:mb-0 sm:flex-row sm:items-center">
               <Link
                 href="/collections"
-                className="btn group bg-[var(--color-ink)] text-[var(--color-ivory)] hover:bg-[var(--color-champagne)] hover:text-[var(--color-ink)]"
+                className="btn group bg-(--color-ink) text-(--color-ivory) hover:bg-(--color-champagne) hover:text-(--color-ink)"
               >
                 Shop Collection
                 <ArrowRight size={16} strokeWidth={1.5} className="transition-transform duration-300 group-hover:translate-x-1" />
@@ -42,7 +42,7 @@ const Hero = () => {
 
               <Link
                 href="/new-arrivals"
-                className="btn btn-outline group border-[var(--color-ink)] text-[var(--color-ink)] hover:border-(--color-champagne) hover:text-(--color-champagne)"
+                className="btn btn-outline group border-(--color-ink) text-(--color-ink) hover:border-(--color-champagne) hover:text-(--color-champagne)"
               >
                 Explore New Arrivals
                 <ArrowRight size={16} strokeWidth={1.5} />
@@ -58,7 +58,7 @@ const Hero = () => {
 >
  
   
-  <div className="absolute h-32 w-32 rounded-full bg-(--color-champagne)/20 blur-3xl translate-y-16" />
+  <div className="absolute h-32 w-32 rounded-full bg-champagne/20 blur-3xl translate-y-16" />
 
   <Image
     src="/images/shoe-new.png"
@@ -66,7 +66,7 @@ const Hero = () => {
     width={1000}
     height={750}
     priority
-    className="relative top-5 sm:h-[480px] sm:w-[510px] rounded-full drop-shadow-[0_35px_25px_rgba(0,0,0,0.5)]"
+    className="relative top-5 sm:h-120 sm:w-127.5 rounded-full drop-shadow-[0_35px_25px_rgba(0,0,0,0.5)]"
   />
 
   

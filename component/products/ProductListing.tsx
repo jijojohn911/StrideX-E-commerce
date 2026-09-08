@@ -14,6 +14,7 @@ interface ApiProduct {
 
 interface ProductListingProps {
   gender?: "men" | "women";
+   category?: string;
   eyebrow: string;
   title: string;
   description: string;
@@ -23,6 +24,7 @@ const AVAILABLE_SIZES = ["6", "7", "8", "9", "10", "11"];
 
 export default function ProductListing({
   gender,
+  category,
   eyebrow,
   title,
   description,
@@ -40,6 +42,7 @@ export default function ProductListing({
       try {
         const params = new URLSearchParams();
         if (gender) params.set("gender", gender);
+        if (category) params.set("category", category);
         if (sizeFilter) params.set("size", sizeFilter);
         if (sort) params.set("sort", sort);
 
@@ -67,7 +70,7 @@ export default function ProductListing({
       }
     };
     fetchProducts();
-  }, [gender, sort, sizeFilter]);
+ }, [gender, category, sort, sizeFilter]);
 
   return (
     <div className="bg-ivory">

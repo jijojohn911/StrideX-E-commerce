@@ -21,7 +21,7 @@ const LoginPage = () => {
       <div className="relative z-10 flex w-full max-w-5xl overflow-hidden rounded-2xl border border-stone-light/50 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.12)]">
 
         {/* IMAGE */}
-        <div className="relative hidden min-h-[560px] w-[42%] overflow-hidden bg-(--color-ink) md:block">
+        <div className="relative hidden min-h-140 w-[42%] overflow-hidden bg-(--color-ink) md:block">
 
           <Image
             src="/images/lifestyle_shoe.png"

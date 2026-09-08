@@ -20,10 +20,7 @@ export default  function Home() {
       <MostLoved/>
       <NewArrivals/>
      <BrandStory/>
-     <Footer/>
-
-
-      
+     <Footer/>  
     </>
   );
 }
