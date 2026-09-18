@@ -5,7 +5,7 @@ export interface IProduct extends Document {
   description: string;
   brand: string;
   category: string;
-  gender: "men" | "women" | "unisex" ;
+  gender: "men" | "women" | "unisex";
   price: number;
   discountPrice?: number;
   images: string[];
@@ -49,7 +49,7 @@ const productSchema = new Schema<IProduct>(
     },
     gender: {
       type: String,
-      enum: ["men", "women", "unisex",],
+      enum: ["men", "women", "unisex"],
       required: true,
     },
     sizes: {
@@ -68,16 +68,18 @@ const productSchema = new Schema<IProduct>(
         message: "Atleast one product image is required",
       },
     },
- discountPrice: {
-  type: Number,
-  min: 0,
-  validate: {
-    validator: function (this: IProduct, value: number | undefined) {
-      return value == null || value < this.price;
+    discountPrice: {
+      type: Number,
+      min: 0,
+      validate: {
+        validator: function (this: IProduct, value: number | undefined) {
+          if (value == null) return true;
+          if (this.price == null) return true; // update-context guard: this.price may be unresolved here — Zod already validated the relationship at the API layer
+          return value < this.price;
+        },
+        message: "Discount price must be less than regular price",
+      },
     },
-    message: "Discount price must be less than regular price",
-  },
-},
     category: {
       type: String,
       required: true,

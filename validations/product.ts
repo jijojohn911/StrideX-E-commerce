@@ -11,7 +11,7 @@ const baseProductSchema = z.object({
     .string()
     .trim()
     .min(3, "Description must be at least 3 characters")
-    .max(100, "Description cannot exceed 100 characters"),
+    .max(1000, "Description cannot exceed 1000 characters"),
 
   price: z
     .number()
@@ -78,4 +78,11 @@ export const createProductSchema = baseProductSchema.refine(
   }
 );
 
-export const updateProductSchema = baseProductSchema.partial();
+export const updateProductSchema = baseProductSchema.partial().refine(
+  (data) =>
+    data.discountPrice == null || data.price == null || data.discountPrice < data.price,
+  {
+    message: "Discount price must be less than regular price",
+    path: ["discountPrice"],
+  }
+);

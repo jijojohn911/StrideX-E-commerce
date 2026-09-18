@@ -10,10 +10,41 @@
   --color-champagne: #c3a06b;
   --color-white: #ffffff;
 
+  /* ---- Admin panel colors (scoped under .admin-theme, see styles/admin-theme.css) ---- */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-champagne-soft: var(--champagne-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+
   /* ---- Type ---- */
   --font-display: var(--font-cormorant), "Times New Roman", serif;
-  --font-sans: var(--font-manrope), -apple-system, sans-serif;
+   --font-sans: var(--font-manrope), -apple-system, sans-serif;
 
+   
   /* ---- Type scale ---- */
   --text-display-xl: 6rem;
   --text-display-xl--line-height: 0.98;
@@ -47,9 +78,7 @@
   --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ==========================================================================
-   Base
-   ========================================================================== */
+/*Base*/
 
 html {
   scroll-behavior: smooth;

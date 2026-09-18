@@ -59,8 +59,12 @@ export default function LoginForm() {
         return;
       }
 
-      router.push("/");
-      router.refresh();
+      if(data.user?.role  === "admin"){
+        router.push("/admin");
+      }else{
+        router.push("/")
+      }
+      router.refresh()
     } catch (error) {
       console.error("Login error:", error);
       setError("Network error. Please try again.");

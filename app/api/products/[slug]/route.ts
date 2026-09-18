@@ -12,36 +12,27 @@ export const GET = async (
   try {
     const { slug } = await params;
     await connectDB();
-    const product = await Product.findOne({
-      slug,
-      isActive: true,
-    });
+
+    const authUser = getAuthUser(req);
+    const isAdmin = authUser?.role === "admin";
+
+    const query: Record<string, unknown> = { slug };
+    if (!isAdmin) query.isActive = true;
+
+    const product = await Product.findOne(query);
 
     if (!product) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "product not found",
-        },
+        { success: false, message: "product not found" },
         { status: 404 },
       );
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        product,
-      },
-      { status: 200 },
-    );
+    return NextResponse.json({ success: true, product }, { status: 200 });
   } catch (error) {
     console.error(error);
-
     return NextResponse.json(
-      {
-        success: false,
-        message: "Internal Server Error",
-      },
+      { success: false, message: "Internal Server Error" },
       { status: 500 },
     );
   }
@@ -80,16 +71,13 @@ export const PUT = async (
     await connectDB();
 
     const product = await Product.findOneAndUpdate(
-      {
-        slug,
-        isActive: true,
-      },
-      result.data,
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
+  { slug },
+  result.data,
+  {
+    new: true,
+    runValidators: true,
+  },
+);
 
     if (!product) {
       return NextResponse.json(
