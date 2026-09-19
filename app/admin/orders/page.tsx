@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { AdminCard } from "@/component/admin/AdminCard";
 import { StatusBadge } from "@/component/admin/StatusBadge";
@@ -26,11 +27,11 @@ const ORDER_STATUSES = [
   "returned",
 ];
 
-export default function AdminOrdersPage() {
+function AdminOrders({ initialSearch }: { initialSearch: string }) {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -227,5 +228,20 @@ export default function AdminOrdersPage() {
         )}
       </AdminCard>
     </div>
+  );
+}
+
+function OrdersWithSearchParam() {
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams.get("search") ?? "";
+  // urlSearch maarumbol key maarum, component remount aayi puthiya search pick aakum
+  return <AdminOrders key={urlSearch} initialSearch={urlSearch} />;
+}
+
+export default function AdminOrdersPage() {
+  return (
+    <Suspense fallback={null}>
+      <OrdersWithSearchParam />
+    </Suspense>
   );
 }

@@ -1,5 +1,5 @@
+import "@/models/User";
 import mongoose, { Schema, Document, Model } from "mongoose";
-
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
   title: string;

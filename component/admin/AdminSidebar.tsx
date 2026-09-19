@@ -1,19 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingBag,
   Package,
-  Users,
-  Layers,
-  Tag,
-  Boxes,
-  Star,
-  CreditCard,
-  TrendingUp,
-  Settings,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
@@ -27,20 +20,55 @@ export interface AdminNavItem {
 
 export const adminNav: AdminNavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin" },
-  { label: "Orders", icon: ShoppingBag },
+  { label: "Orders", icon: ShoppingBag, href: "/admin/orders" },
   { label: "Products", icon: Package, href: "/admin/products" },
-  { label: "Customers", icon: Users },
-  { label: "Categories", icon: Layers },
-  { label: "Brands", icon: Tag },
-  { label: "Inventory", icon: Boxes },
-  { label: "Reviews", icon: Star },
-  { label: "Payments", icon: CreditCard },
-  { label: "Revenue", icon: TrendingUp },
-  { label: "Settings", icon: Settings },
+  // { label: "Customers", icon: Users, href: "/admin/customers" },
+  // { label: "Inventory", icon: Boxes, href: "/admin/inventory" },
+  // { label: "Payments", icon: CreditCard, href: "/admin/payments" },
+  // { label: "Revenue", icon: TrendingUp, href: "/admin/revenue" },
 ];
 
 export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [me, setMe] = useState<{ username?: string; role?: string } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const loadMe = async () => {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        const data = await res.json();
+        if (res.ok && data.success) setMe(data.user);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadMe();
+  }, []);
+
+  const displayName = me?.username || "Admin";
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      router.push("/login");
+      router.refresh();
+    }
+  };
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -108,19 +136,20 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t border-sidebar-border px-3 py-4">
         <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-md px-2 py-2">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-champagne text-sm font-semibold text-primary">
-            RS
+            {initials}
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-medium">
-              Riya Sharma
+              {displayName}
             </span>
             <span className="block truncate text-xs text-sidebar-muted">
-              Store Admin
+              {me?.role === "admin" ? "Store Admin" : (me?.role ?? "")}
             </span>
           </span>
         </div>
         <button
           type="button"
+          onClick={handleLogout}
           className="mt-2 flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm text-sidebar-muted transition-colors hover:bg-sidebar-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne"
         >
           <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
