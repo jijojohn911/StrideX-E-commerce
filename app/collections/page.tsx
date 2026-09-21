@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Navbar from "@/component/layout/Navbar";
+import Footer from "@/component/layout/Footer";
 
 const COLLECTIONS = [
   {
@@ -25,6 +27,8 @@ const COLLECTIONS = [
 
 export default function CollectionsPage() {
   return (
+    <>
+     <Navbar cartCount={0} />
     <div className="bg-ivory">
       <section className="section-y">
         <div className="container-stridex">
@@ -68,5 +72,7 @@ export default function CollectionsPage() {
         </div>
       </section>
     </div>
+    <Footer/>
+    </>
   );
 }

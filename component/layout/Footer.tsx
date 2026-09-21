@@ -8,7 +8,7 @@ const shopLinks = [
 ];
 const companyLinks = [
   { label: "Our Story", href: "/about" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact", href: "mailto:jijojohn911@gmail.com" },
   { label: "FAQ", href: "/faq" },
 ];
 
@@ -17,7 +17,7 @@ export default function Footer() {
     <footer className="bg-(--color-ink) text-(--color-ivory)">
       <div className="container-stridex">
 
-        {/* Main footer */}
+        {/* Main Footer */}
         <div className="grid gap-12 border-b border-white/10 py-16 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
 
           {/* Brand */}
@@ -102,20 +102,16 @@ export default function Footer() {
             © 2026 StrideX. All rights reserved.
           </p>
 
-          <div className="flex gap-6">
-            <Link
-              href="/privacy"
-              className="transition-colors hover:text-(--color-ivory)"
-            >
-              Privacy
-            </Link>
+          <div className="flex gap-10">
+          
+             <span>Privacy</span>
+              
+           
 
-            <Link
-              href="/terms"
-              className="transition-colors hover:text-(--color-ivory)"
-            >
-              Terms
-            </Link>
+           <span>Terms</span>
+           -
+              
+            
           </div>
         </div>
 

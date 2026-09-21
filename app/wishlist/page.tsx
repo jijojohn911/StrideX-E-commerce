@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
+import Navbar from "@/component/layout/Navbar";
+import Footer from "@/component/layout/Footer";
 
 interface WishlistProduct {
   _id: string;
@@ -88,6 +90,8 @@ const WishlistPage = () => {
   }
 
   return (
+    <>
+     <Navbar cartCount={0} />
     <div className="min-h-screen bg-ivory">
       <div className="container-stridex section-y">
         <p className="eyebrow text-champagne mb-3">Saved</p>
@@ -153,6 +157,8 @@ const WishlistPage = () => {
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

@@ -5,6 +5,9 @@ import { Heart, Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Navbar from "@/component/layout/Navbar";
+import { count } from "console";
+import Footer from "@/component/layout/Footer";
 
 interface Product {
   _id:string;
@@ -165,6 +168,8 @@ export default function ProductPage({ params }: ProductPageProps) {
   };
 
   return (
+    <>
+    <Navbar cartCount={0} />
     <main className="bg-(--color-ivory)">
       <section className="section-y">
         <div className="container-stridex">
@@ -386,5 +391,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         </div>
       </section>
     </main>
+    <Footer/>
+    </>
   );
 }

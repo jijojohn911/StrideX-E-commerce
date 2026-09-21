@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Navbar from "@/component/layout/Navbar";
+import Footer from "@/component/layout/Footer";
 
 interface OrderItem {
   product: string;
@@ -100,6 +102,8 @@ const OrderConfirmationPage = () => {
     year: "numeric",
   });
   return (
+    <>
+     <Navbar cartCount={0} />
  <div className="min-h-screen bg-ivory">
       <div className="container-stridex section-y">
         {/* Success header */}
@@ -216,6 +220,8 @@ const OrderConfirmationPage = () => {
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

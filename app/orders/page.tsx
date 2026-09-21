@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Navbar from "@/component/layout/Navbar";
+import Footer from "@/component/layout/Footer";
 
 interface OrderItem {
   product: string;
@@ -69,6 +71,8 @@ export default function OrdersPage() {
   }
 
   return (
+    <>
+     <Navbar cartCount={0} />
     <div className="min-h-screen bg-ivory">
       <div className="container-stridex section-y">
         <p className="eyebrow text-champagne mb-3">Account</p>
@@ -146,5 +150,7 @@ export default function OrdersPage() {
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 }

@@ -6,8 +6,10 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, X, ShoppingBag, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Navbar from "@/component/layout/Navbar";
+import Footer from "@/component/layout/Footer";
 
-// Types — mirrors the populated Cart API response
+
 
 interface Product {
   _id: string;
@@ -36,7 +38,7 @@ interface ApiResponse {
   cart?: CartData;
 }
 
-// Identifies one line so we can key loading state / list items
+
 const itemKey = (item: CartItem) =>
   `${item.product?._id ?? "unknown"}-${item.size}-${item.color}`;
 
@@ -92,7 +94,7 @@ export default function CartPage() {
         credentials: "include",
       });
 
-      // 🔴 Not logged in
+  
       if (res.status === 401) {
         router.replace("/login");
         return;
@@ -168,7 +170,7 @@ export default function CartPage() {
     }
   };
 
-  // ---------- remove item ----------
+  //remove item
   const removeItem = async (item: CartItem) => {
     if (!item.product) return;
 
@@ -203,7 +205,7 @@ export default function CartPage() {
     }
   };
 
-  // ---------- derived totals ----------
+  //derived totals 
   const items = cart?.items ?? [];
   const validItems = items.filter((item) => item.product !== null);
 
@@ -215,7 +217,7 @@ export default function CartPage() {
 
   const formatPrice = (value: number) => `₹${value.toLocaleString("en-IN")}`;
 
-  // Loading state
+ 
 
   if (isLoading) {
     return (
@@ -246,7 +248,7 @@ export default function CartPage() {
     );
   }
 
-  // Error state (fetch failed)
+
 
   if (error) {
     return (
@@ -268,7 +270,6 @@ export default function CartPage() {
     );
   }
 
-  // Empty cart
 
   if (validItems.length === 0) {
     return (
@@ -308,9 +309,11 @@ export default function CartPage() {
     );
   }
 
-  // Cart with items
+ 
 
   return (
+    <>
+     <Navbar cartCount={0} />
     <section className="min-h-[calc(100svh-76px)] bg-ivory">
       <div className="container-stridex py-16 lg:py-20">
         <div className="mb-10 lg:mb-14">
@@ -492,5 +495,7 @@ export default function CartPage() {
         </div>
       </div>
     </section>
+    <Footer/>
+    </>
   );
 }

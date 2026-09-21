@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { AdminCard } from "@/component/admin/AdminCard";
@@ -21,11 +22,11 @@ interface AdminProduct {
 
 const inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
-export default function AdminProductsPage() {
+function AdminProducts({ initialSearch }: { initialSearch: string }) {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [busySlug, setBusySlug] = useState<string | null>(null);
 
   const load = useCallback(async (q: string) => {
@@ -63,7 +64,10 @@ export default function AdminProductsPage() {
         onClick: async () => {
           setBusySlug(slug);
           try {
-            const res = await fetch(`/api/products/${slug}`, { method: "DELETE", credentials: "include" });
+            const res = await fetch(`/api/products/${slug}`, {
+              method: "DELETE",
+              credentials: "include",
+            });
             const data = await res.json();
             if (!res.ok || !data.success) {
               toast.error(data.message || "Failed to delete product");
@@ -112,7 +116,9 @@ export default function AdminProductsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold">Products</h1>
-          <p className="text-sm text-muted-foreground">Manage the StrideX catalog</p>
+          <p className="text-sm text-muted-foreground">
+            Manage the StrideX catalog
+          </p>
         </div>
         <Link
           href="/admin/products/new"
@@ -138,7 +144,9 @@ export default function AdminProductsPage() {
       >
         {error && <p className="px-5 py-4 text-sm text-destructive">{error}</p>}
         {!error && loading && (
-          <p className="px-5 py-6 text-center text-xs text-muted-foreground">Loading...</p>
+          <p className="px-5 py-6 text-center text-xs text-muted-foreground">
+            Loading...
+          </p>
         )}
 
         {!error && !loading && (
@@ -158,36 +166,56 @@ export default function AdminProductsPage() {
               <tbody>
                 {products.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-5 py-6 text-center text-xs text-muted-foreground">
+                    <td
+                      colSpan={7}
+                      className="px-5 py-6 text-center text-xs text-muted-foreground"
+                    >
                       No products found
                     </td>
                   </tr>
                 )}
                 {products.map((product) => (
-                  <tr key={product._id} className="border-b border-border last:border-0 hover:bg-secondary/50">
+                  <tr
+                    key={product._id}
+                    className="border-b border-border last:border-0 hover:bg-secondary/50"
+                  >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md border border-border bg-secondary">
                           {product.images[0] && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
+                            <img
+                              src={product.images[0]}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
                           )}
                         </div>
-                        <span className="max-w-55 truncate font-medium">{product.title}</span>
+                        <span className="max-w-55 truncate font-medium">
+                          {product.title}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground">{product.brand}</td>
-                    <td className="px-5 py-3 capitalize text-muted-foreground">{product.category}</td>
+                    <td className="px-5 py-3 text-muted-foreground">
+                      {product.brand}
+                    </td>
+                    <td className="px-5 py-3 capitalize text-muted-foreground">
+                      {product.category}
+                    </td>
                     <td className="px-5 py-3">
                       {product.discountPrice ? (
                         <span>
-                          <span className="font-medium">₹{inr.format(product.discountPrice)}</span>{" "}
+                          <span className="font-medium">
+                            ₹{inr.format(product.discountPrice)}
+                          </span>{" "}
                           <span className="text-xs text-muted-foreground line-through">
                             ₹{inr.format(product.price)}
                           </span>
                         </span>
                       ) : (
-                        <span className="font-medium">₹{inr.format(product.price)}</span>
+                        <span className="font-medium">
+                          ₹{inr.format(product.price)}
+                        </span>
                       )}
                     </td>
                     <td className="px-5 py-3">{product.stock}</td>
@@ -214,7 +242,9 @@ export default function AdminProductsPage() {
                         {product.isActive ? (
                           <button
                             type="button"
-                            onClick={() => handleDelete(product.slug, product.title)}
+                            onClick={() =>
+                              handleDelete(product.slug, product.title)
+                            }
                             disabled={busySlug === product.slug}
                             className="grid h-8 w-8 place-items-center rounded-md border border-border text-destructive hover:bg-destructive-soft disabled:opacity-50"
                             aria-label={`Delete ${product.title}`}
@@ -242,5 +272,20 @@ export default function AdminProductsPage() {
         )}
       </AdminCard>
     </div>
+  );
+}
+
+function ProductsWithSearchParam() {
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams.get("search") ?? "";
+  // urlSearch maarumbol key maarum, component remount aayi puthiya search pick aakum
+  return <AdminProducts key={urlSearch} initialSearch={urlSearch} />;
+}
+
+export default function AdminProductsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProductsWithSearchParam />
+    </Suspense>
   );
 }

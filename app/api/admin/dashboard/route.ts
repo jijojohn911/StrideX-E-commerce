@@ -5,10 +5,6 @@ import Order from "@/models/Order";
 import Product from "@/models/Product";
 import User from "@/models/User";
 
-
-
-
-// Add these types near the top of the file, below the imports
 interface PopulatedUser {
   _id: string;
   username?: string;
@@ -83,26 +79,47 @@ export const GET = async (req: NextRequest) => {
     const start30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const start60 = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const start180 = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+    const start180 = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
-    // ---------- Stats ----------
+    // Stats
     const [
-      revLast30, revPrior30, ordersLast30, ordersPrior30,
-      customersLast30, customersPrior30, totalCustomers,
-      totalProducts, productsThisMonth, totalRevenueAgg, totalOrders,
+      revLast30,
+      revPrior30,
+      ordersLast30,
+      ordersPrior30,
+      customersLast30,
+      customersPrior30,
+      totalCustomers,
+      totalProducts,
+      productsThisMonth,
+      totalRevenueAgg,
+      totalOrders,
     ] = await Promise.all([
       Order.aggregate([
-        { $match: { createdAt: { $gte: start30 }, orderStatus: { $ne: "cancelled" } } },
+        {
+          $match: {
+            createdAt: { $gte: start30 },
+            orderStatus: { $ne: "cancelled" },
+          },
+        },
         { $group: { _id: null, total: { $sum: "$totalAmount" } } },
       ]),
       Order.aggregate([
-        { $match: { createdAt: { $gte: start60, $lt: start30 }, orderStatus: { $ne: "cancelled" } } },
+        {
+          $match: {
+            createdAt: { $gte: start60, $lt: start30 },
+            orderStatus: { $ne: "cancelled" },
+          },
+        },
         { $group: { _id: null, total: { $sum: "$totalAmount" } } },
       ]),
       Order.countDocuments({ createdAt: { $gte: start30 } }),
       Order.countDocuments({ createdAt: { $gte: start60, $lt: start30 } }),
       User.countDocuments({ role: "user", createdAt: { $gte: start30 } }),
-      User.countDocuments({ role: "user", createdAt: { $gte: start60, $lt: start30 } }),
+      User.countDocuments({
+        role: "user",
+        createdAt: { $gte: start60, $lt: start30 },
+      }),
       User.countDocuments({ role: "user" }),
       Product.countDocuments({ isActive: true }),
       Product.countDocuments({ createdAt: { $gte: startOfMonth } }),
@@ -121,29 +138,63 @@ export const GET = async (req: NextRequest) => {
     const totalRevenue = totalRevenueAgg[0]?.total ?? 0;
 
     const stats = [
-      { id: "revenue", label: "Total Revenue", value: inr(totalRevenue),
-        change: Math.abs(revenueChange), direction: revenueChange >= 0 ? "up" : "down",
-        hint: "vs last 30 days" },
-      { id: "orders", label: "Total Orders", value: totalOrders.toLocaleString("en-IN"),
-        change: Math.abs(ordersChange), direction: ordersChange >= 0 ? "up" : "down",
-        hint: "vs last 30 days" },
-      { id: "customers", label: "Total Customers", value: totalCustomers.toLocaleString("en-IN"),
-        change: Math.abs(customersChange), direction: customersChange >= 0 ? "up" : "down",
-        hint: "vs last 30 days" },
-      { id: "products", label: "Total Products", value: totalProducts.toLocaleString("en-IN"),
-        change: 0, direction: "up", hint: `${productsThisMonth} added this month` },
+      {
+        id: "revenue",
+        label: "Total Revenue",
+        value: inr(totalRevenue),
+        change: Math.abs(revenueChange),
+        direction: revenueChange >= 0 ? "up" : "down",
+        hint: "vs last 30 days",
+      },
+      {
+        id: "orders",
+        label: "Total Orders",
+        value: totalOrders.toLocaleString("en-IN"),
+        change: Math.abs(ordersChange),
+        direction: ordersChange >= 0 ? "up" : "down",
+        hint: "vs last 30 days",
+      },
+      {
+        id: "customers",
+        label: "Total Customers",
+        value: totalCustomers.toLocaleString("en-IN"),
+        change: Math.abs(customersChange),
+        direction: customersChange >= 0 ? "up" : "down",
+        hint: "vs last 30 days",
+      },
+      {
+        id: "products",
+        label: "Total Products",
+        value: totalProducts.toLocaleString("en-IN"),
+        change: 0,
+        direction: "up",
+        hint: `${productsThisMonth} added this month`,
+      },
     ];
 
-    // ---------- Revenue series (bucketed in JS from one 180-day query) ----------
- const recentRevenueOrders = await Order.find({
-  createdAt: { $gte: start180 },
-  orderStatus: { $ne: "cancelled" },
-})
-  .select("totalAmount createdAt")
-  .lean<{ totalAmount: number; createdAt: Date }[]>();
+    //Revenue series
+    const recentRevenueOrders = await Order.find({
+      createdAt: { $gte: start180 },
+      orderStatus: { $ne: "cancelled" },
+    })
+      .select("totalAmount createdAt")
+      .lean<{ totalAmount: number; createdAt: Date }[]>();
 
     const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const monthLabels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const monthLabels = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
 
     const dayBuckets = Array.from({ length: 7 }).map((_, i) => {
       const date = new Date(today);
@@ -152,18 +203,21 @@ export const GET = async (req: NextRequest) => {
     });
     const daily = dayBuckets.map((b) => ({
       label: dayLabels[b.start.getDay()],
-      revenue: recentRevenueOrders.filter((o) => o.createdAt >= b.start && o.createdAt < b.end)
+      revenue: recentRevenueOrders
+        .filter((o) => o.createdAt >= b.start && o.createdAt < b.end)
         .reduce((sum, o) => sum + o.totalAmount, 0),
     }));
 
     const weekBuckets = Array.from({ length: 6 }).map((_, i) => {
-      const end = new Date(today.getTime() - (5 - i) * 7 * 86400000);
+      const tomorrow = new Date(today.getTime() + 86400000);
+      const end = new Date(tomorrow.getTime() - (5 - i) * 7 * 86400000);
       const start = new Date(end.getTime() - 7 * 86400000);
       return { start, end };
     });
     const weekly = weekBuckets.map((b, i) => ({
       label: `W${i + 1}`,
-      revenue: recentRevenueOrders.filter((o) => o.createdAt >= b.start && o.createdAt < b.end)
+      revenue: recentRevenueOrders
+        .filter((o) => o.createdAt >= b.start && o.createdAt < b.end)
         .reduce((sum, o) => sum + o.totalAmount, 0),
     }));
 
@@ -174,30 +228,68 @@ export const GET = async (req: NextRequest) => {
     });
     const monthly = monthBuckets.map((b) => ({
       label: monthLabels[b.start.getMonth()],
-      revenue: recentRevenueOrders.filter((o) => o.createdAt >= b.start && o.createdAt < b.end)
+      revenue: recentRevenueOrders
+        .filter((o) => o.createdAt >= b.start && o.createdAt < b.end)
         .reduce((sum, o) => sum + o.totalAmount, 0),
     }));
 
-    const revenueSeries: Record<RevenueRange, { label: string; revenue: number }[]> = { daily, weekly, monthly };
-    const sumRange = (arr: { revenue: number }[]) => arr.reduce((s, p) => s + p.revenue, 0);
+    const revenueSeries: Record<
+      RevenueRange,
+      { label: string; revenue: number }[]
+    > = { daily, weekly, monthly };
+    const sumRange = (arr: { revenue: number }[]) =>
+      arr.reduce((s, p) => s + p.revenue, 0);
 
-    const dailyPriorSum = recentRevenueOrders.filter((o) =>
-      o.createdAt >= new Date(dayBuckets[0].start.getTime() - 7 * 86400000) && o.createdAt < dayBuckets[0].start
-    ).reduce((s, o) => s + o.totalAmount, 0);
-    const weeklyPriorSum = recentRevenueOrders.filter((o) =>
-      o.createdAt >= new Date(weekBuckets[0].start.getTime() - 6 * 7 * 86400000) && o.createdAt < weekBuckets[0].start
-    ).reduce((s, o) => s + o.totalAmount, 0);
-    const monthlyPriorSum = recentRevenueOrders.filter((o) =>
-      o.createdAt >= new Date(monthBuckets[0].start.getFullYear(), monthBuckets[0].start.getMonth() - 6, 1) && o.createdAt < monthBuckets[0].start
-    ).reduce((s, o) => s + o.totalAmount, 0);
+    const dailyPriorSum = recentRevenueOrders
+      .filter(
+        (o) =>
+          o.createdAt >=
+            new Date(dayBuckets[0].start.getTime() - 7 * 86400000) &&
+          o.createdAt < dayBuckets[0].start,
+      )
+      .reduce((s, o) => s + o.totalAmount, 0);
+    const weeklyPriorSum = recentRevenueOrders
+      .filter(
+        (o) =>
+          o.createdAt >=
+            new Date(weekBuckets[0].start.getTime() - 6 * 7 * 86400000) &&
+          o.createdAt < weekBuckets[0].start,
+      )
+      .reduce((s, o) => s + o.totalAmount, 0);
+    const monthlyPriorSum = recentRevenueOrders
+      .filter(
+        (o) =>
+          o.createdAt >=
+            new Date(
+              monthBuckets[0].start.getFullYear(),
+              monthBuckets[0].start.getMonth() - 6,
+              1,
+            ) && o.createdAt < monthBuckets[0].start,
+      )
+      .reduce((s, o) => s + o.totalAmount, 0);
 
-    const revenueSummary: Record<RevenueRange, { total: string; change: number; caption: string }> = {
-      daily: { total: inr(sumRange(daily)), change: pctChange(sumRange(daily), dailyPriorSum), caption: "Last 7 days" },
-      weekly: { total: inr(sumRange(weekly)), change: pctChange(sumRange(weekly), weeklyPriorSum), caption: "Last 6 weeks" },
-      monthly: { total: inr(sumRange(monthly)), change: pctChange(sumRange(monthly), monthlyPriorSum), caption: "Last 6 months" },
+    const revenueSummary: Record<
+      RevenueRange,
+      { total: string; change: number; caption: string }
+    > = {
+      daily: {
+        total: inr(sumRange(daily)),
+        change: pctChange(sumRange(daily), dailyPriorSum),
+        caption: "Last 7 days",
+      },
+      weekly: {
+        total: inr(sumRange(weekly)),
+        change: pctChange(sumRange(weekly), weeklyPriorSum),
+        caption: "Last 6 weeks",
+      },
+      monthly: {
+        total: inr(sumRange(monthly)),
+        change: pctChange(sumRange(monthly), monthlyPriorSum),
+        caption: "Last 6 months",
+      },
     };
 
-    // ---------- Recent orders ----------
+    // Recent orders
     const recentOrdersRaw = await Order.find({})
       .sort({ createdAt: -1 })
       .limit(5)
@@ -219,9 +311,14 @@ export const GET = async (req: NextRequest) => {
       status: o.orderStatus,
     }));
 
-    // ---------- Top products (this calendar month) ----------
+    //Top products (this calendar month)
     const topAgg = await Order.aggregate<TopProductAgg>([
-      { $match: { createdAt: { $gte: startOfMonth }, orderStatus: { $ne: "cancelled" } } },
+      {
+        $match: {
+          createdAt: { $gte: startOfMonth },
+          orderStatus: { $ne: "cancelled" },
+        },
+      },
       { $unwind: "$items" },
       {
         $group: {
@@ -259,8 +356,11 @@ export const GET = async (req: NextRequest) => {
       };
     });
 
-    // ---------- Low stock ----------
-    const lowStockDocs = await Product.find({ isActive: true, stock: { $lte: 10 } })
+    //  Low stock
+    const lowStockDocs = await Product.find({
+      isActive: true,
+      stock: { $lte: 10 },
+    })
       .sort({ stock: 1 })
       .limit(5)
       .select("title brand stock")
@@ -271,15 +371,24 @@ export const GET = async (req: NextRequest) => {
       name: p.title,
       size: p.brand,
       stock: p.stock,
-      status: p.stock === 0 ? "out-of-stock" : p.stock < 5 ? "low-stock" : "in-stock",
+      status:
+        p.stock === 0 ? "out-of-stock" : p.stock < 5 ? "low-stock" : "in-stock",
     }));
 
     return NextResponse.json({
-      success: true, stats, revenueSeries, revenueSummary,
-      recentOrders, topProducts, lowStockItems,
+      success: true,
+      stats,
+      revenueSeries,
+      revenueSummary,
+      recentOrders,
+      topProducts,
+      lowStockItems,
     });
   } catch (error) {
     console.error("Admin dashboard error:", error);
-    return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Something went wrong" },
+      { status: 500 },
+    );
   }
 };

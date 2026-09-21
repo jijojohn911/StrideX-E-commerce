@@ -2,6 +2,9 @@
 
 import { use } from "react";
 import ProductListing from "@/component/products/ProductListing";
+import Navbar from "@/component/layout/Navbar";
+import Footer from "@/component/layout/Footer";
+
 
 const COLLECTION_INFO: Record<
   string,
@@ -38,11 +41,15 @@ export default function CollectionPage({
   };
 
 return (
+  <>
+   <Navbar cartCount={0} />
   <ProductListing
     category={slug}
     eyebrow={info.eyebrow}
     title={info.title}
     description={info.description}
   />
+  <Footer/>
+  </>
 );
 }

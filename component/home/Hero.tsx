@@ -41,7 +41,7 @@ const Hero = () => {
               </Link>
 
               <Link
-                href="/new-arrivals"
+                href="/products"
                 className="btn btn-outline group border-(--color-ink) text-(--color-ink) hover:border-(--color-champagne) hover:text-(--color-champagne)"
               >
                 Explore New Arrivals

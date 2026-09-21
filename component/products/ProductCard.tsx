@@ -11,6 +11,7 @@ export interface ProductCardData {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number; // puthiyathu: discount undenkil strike cheyyunna price
   image: string;
   href: string;
 }
@@ -18,6 +19,15 @@ export interface ProductCardData {
 export default function ProductCard({ product }: { product: ProductCardData }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+
+  const hasDiscount =
+    !!product.originalPrice && product.originalPrice > product.price;
+  const discountPercent = hasDiscount
+    ? Math.round(
+        ((product.originalPrice! - product.price) / product.originalPrice!) *
+          100,
+      )
+    : 0;
 
   useEffect(() => {
     async function checkWishlistStatus() {
@@ -128,9 +138,23 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
               {product.name}
             </p>
           </Link>
-          <p className="mt-1 text-sm text-(--color-stone)">
-            ₹{product.price.toLocaleString("en-IN")}
-          </p>
+
+          {/* Price + discount */}
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 text-sm">
+            <span className="text-(--color-stone)">
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
+            {hasDiscount && (
+              <>
+                <span className="text-(--color-stone)/60 line-through">
+                  ₹{product.originalPrice!.toLocaleString("en-IN")}
+                </span>
+                <span className="text-xs font-medium text-(--color-champagne)">
+                  {discountPercent}% off
+                </span>
+              </>
+            )}
+          </div>
         </div>
 
         <Link
