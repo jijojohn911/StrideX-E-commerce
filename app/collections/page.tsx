@@ -8,7 +8,7 @@ const COLLECTIONS = [
   {
     title: "LIFE STYLE",
     description: "Everyday style. Maximum comfort",
-    image: "/images/Lifestyle_shoe.png",
+    image: "/images/lifestyle_shoe.png",
     href: "/collection/lifestyle",
   },
   {
