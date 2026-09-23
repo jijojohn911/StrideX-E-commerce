@@ -5,7 +5,8 @@ import { getAuthUser } from "@/lib/auth";
 import Cart from "@/models/Cart";
 import { IProduct } from "@/models/Product";
 import { JwtPayload } from "jsonwebtoken";
-
+import Product from "@/models/Product";
+void Product;
 
 const razorpay = new Razorpay({
     key_id:process.env.RAZORPAY_KEY_ID!,
