@@ -1,20 +1,8 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { manrope, cormorant } from "@/lib/fonts";
 import "./globals.css";
 import { Toaster } from "sonner";
 import Script from "next/script";
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: "StrideX | Move Different",
@@ -32,7 +20,7 @@ export default function RootLayout({
       <body
         className={`${cormorant.variable} ${manrope.variable} antialiased`}
       >
-            {children}
+        {children}
         <Toaster
           position="top-center"
           toastOptions={{
