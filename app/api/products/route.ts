@@ -3,7 +3,7 @@ import Product from "@/models/Product";
 import { createProductSchema } from "@/validations/product";
 import { connectDB } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth";
-import { title } from "process";
+
 
 export const POST = async (req: NextRequest) => {
   try {
