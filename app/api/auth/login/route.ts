@@ -5,7 +5,6 @@ import { loginSchema } from "@/validations/auth";
 import { generateToken } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 
-
 export const POST = async (request: Request) => {
   try {
     const body = await request.json();
@@ -51,7 +50,20 @@ export const POST = async (request: Request) => {
       );
     }
 
-       // Generate JWT
+    // Check if user is blocked
+    if (user.isBlocked) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: user.blockedReason
+            ? `Your account has been blocked: ${user.blockedReason}`
+            : "Your account has been blocked. Please contact support.",
+        },
+        { status: 403 },
+      );
+    }
+
+    // Generate JWT
     const token = generateToken({
       userId: user._id.toString(),
       email: user.email,

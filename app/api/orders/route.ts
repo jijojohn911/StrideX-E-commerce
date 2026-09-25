@@ -1,25 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { getAuthUser, JwtPayload } from "@/lib/auth";
+import { requireActiveUser } from "@/lib/requireActiveUser";
 import Cart, { ICart } from "@/models/Cart";
 import Order from "@/models/Order";
 import Address from "@/models/Address";
-import Product,{IProduct} from "@/models/Product";
-
+import Product, { IProduct } from "@/models/Product";
 
 // POST — create an order from the user's cart
 export const POST = async (req: NextRequest) => {
   try {
+    const auth = await requireActiveUser(req);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
+
     await connectDB();
-
-    const user: JwtPayload | null = await getAuthUser(req);
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
 
     const body = await req.json();
     const { addressId, paymentMethod } = body;
@@ -38,7 +32,7 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    // Get the address 
+    // Get the address
     const address = await Address.findOne({
       _id: addressId,
       user: user.userId,
@@ -69,7 +63,7 @@ export const POST = async (req: NextRequest) => {
 
     for (const item of cart.items) {
       // populate() makes item.product the full Product doc here
-const product = item.product as unknown as IProduct;
+      const product = item.product as unknown as IProduct;
 
       if (!product || !product.isActive) {
         return NextResponse.json(
@@ -106,7 +100,7 @@ const product = item.product as unknown as IProduct;
     }
 
     //  Shipping + total
-    const shippingFee = subtotal >= 999 ? 0 : 79; 
+    const shippingFee = subtotal >= 999 ? 0 : 79;
     const totalAmount = subtotal + shippingFee;
 
     //  Generate a unique order number
@@ -134,7 +128,7 @@ const product = item.product as unknown as IProduct;
         method: paymentMethod,
         status: paymentMethod === "cod" ? "pending" : "pending",
       },
-      orderStatus: "confirmed"
+      orderStatus: "confirmed",
     });
 
     //  Decrement stock for each product
@@ -145,7 +139,7 @@ const product = item.product as unknown as IProduct;
       });
     }
 
-    //  Clear the cart
+   
     cart.items = [];
     await cart.save();
 
@@ -165,16 +159,11 @@ const product = item.product as unknown as IProduct;
 // GET — list the logged-in user's orders
 export const GET = async (req: NextRequest) => {
   try {
+    const auth = await requireActiveUser(req);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
+
     await connectDB();
-
-    const user: JwtPayload | null = await getAuthUser(req);
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
 
     const orders = await Order.find({ user: user.userId }).sort({
       createdAt: -1,

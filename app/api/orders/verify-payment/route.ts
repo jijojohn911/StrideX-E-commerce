@@ -1,26 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { connectDB } from "@/lib/mongodb";
-import { getAuthUser } from "@/lib/auth";
+import { requireActiveUser } from "@/lib/requireActiveUser";
 import Cart from "@/models/Cart";
 import Order from "@/models/Order";
 import Address from "@/models/Address";
 import Product, { IProduct } from "@/models/Product";
-import { JwtPayload } from "jsonwebtoken";
+
 
 export const POST = async (req: NextRequest) => {
   try {
     await connectDB();
 
-    const user: JwtPayload | null = await getAuthUser(req);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 },
-      );
-    }
+    const auth = await requireActiveUser(req);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const body = await req.json();
+    
     const {
       razorpay_order_id,
       razorpay_payment_id,

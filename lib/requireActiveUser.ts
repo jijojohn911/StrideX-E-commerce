@@ -7,6 +7,11 @@ type AuthResult =
   | { ok: true; user: JwtPayload }
   | { ok: false; response: NextResponse };
 
+const clearCookie = (res: NextResponse) => {
+  res.cookies.set("token", "", { maxAge: 0, path: "/" });
+  return res;
+};
+
 export const requireActiveUser = async (
   req: NextRequest,
 ): Promise<AuthResult> => {
@@ -27,31 +32,35 @@ export const requireActiveUser = async (
     .select("role isBlocked blockedReason")
     .lean();
 
-  // user delete aayittundenkil
   if (!dbUser) {
-    const res = NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 },
-    );
-    res.cookies.set("token", "", { maxAge: 0, path: "/" });
-    return { ok: false, response: res };
+    return {
+      ok: false,
+      response: clearCookie(
+        NextResponse.json(
+          { success: false, message: "Unauthorized" },
+          { status: 401 },
+        ),
+      ),
+    };
   }
 
   if (dbUser.isBlocked) {
-    const res = NextResponse.json(
-      {
-        success: false,
-        blocked: true,
-        message: dbUser.blockedReason
-          ? `Ninte account block cheythirikkunnu: ${dbUser.blockedReason}`
-          : "Ninte account block cheythirikkunnu. Support-umayi bandhappedu.",
-      },
-      { status: 403 },
-    );
-    res.cookies.set("token", "", { maxAge: 0, path: "/" }); // session kalayuka
-    return { ok: false, response: res };
+    return {
+      ok: false,
+      response: clearCookie(
+        NextResponse.json(
+          {
+            success: false,
+            blocked: true,
+            message: dbUser.blockedReason
+              ? `Your account has been blocked: ${dbUser.blockedReason}`
+              : "Your account has been blocked, please contact support team.",
+          },
+          { status: 403 },
+        ),
+      ),
+    };
   }
 
- 
   return { ok: true, user: { ...payload, role: dbUser.role } };
 };
