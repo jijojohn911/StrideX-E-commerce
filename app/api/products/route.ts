@@ -155,7 +155,10 @@ export const GET = async (req: NextRequest) => {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { success: false, message: "Internal Server Error" },
+      {
+        success: false,
+        message: error instanceof Error ? error.message : "Internal Server Error",
+      },
       { status: 500 },
     );
   }
