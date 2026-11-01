@@ -2,30 +2,29 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import ProductGrid from "@/component/products/ProductGrid";
 import { ProductCardData } from "@/component/products/ProductCard";
-
-interface ApiProduct {
-  _id: string;
-  title: string;
-  price: number;
-  discountPrice?: number;
-  images: string[];
-  slug: string;
-}
+import Product from "@/models/Product";
+import { connectDB } from "@/lib/mongodb";
 
 async function getMostLoved(): Promise<ProductCardData[]> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/products?featured=true&limit=5`,
-    { cache: "no-store" },
-  );
-  const data = await res.json();
+  try {
+    await connectDB();
 
-  return data.products.map((p: ApiProduct) => ({
-    id: p._id,
-    name: p.title,
-    price: p.discountPrice ?? p.price,
-    image: p.images[0],
-    href: `/products/${p.slug}`,
-  }));
+    const products = await Product.find({ isActive: true, featured: true })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    return products.map((p: any) => ({
+      id: String(p._id),
+      name: p.title,
+      price: p.discountPrice ?? p.price,
+      image: p.images?.[0],
+      href: `/products/${p.slug}`,
+    }));
+  } catch (error) {
+    console.error("Failed to load most loved:", error);
+    return [];
+  }
 }
 
 export default async function MostLoved() {
@@ -49,7 +48,11 @@ export default async function MostLoved() {
           </Link>
         </div>
 
-        <ProductGrid products={products} />
+        {products.length === 0 ? (
+          <p className="py-10 text-sm text-(--color-stone)">Popular picks coming soon.</p>
+        ) : (
+          <ProductGrid products={products} />
+        )}
       </div>
     </section>
   );

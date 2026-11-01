@@ -8,6 +8,8 @@ import NewArrivals from "@/component/home/NewArrivals";
 import BrandStory from "@/component/home/BrandStory";
 import Footer from "@/component/layout/Footer"
 
+export const dynamic = "force-dynamic";
+
 export default  function Home() {
   
   
